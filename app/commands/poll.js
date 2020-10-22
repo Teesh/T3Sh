@@ -2,7 +2,7 @@ import moment from 'moment'
 import Discord from 'discord.js'
 
 import { range } from '../../utilities/time-parser.js'
-import { settings } from "../../config/config.js"
+import { settings } from "../../config.js"
 
 export default {
 	name: 'poll',

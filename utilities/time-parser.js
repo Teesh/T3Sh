@@ -1,5 +1,5 @@
 import moment from 'moment'
-import { settings } from '../config/config.js'
+import { settings } from '../config.js'
 
 export function single (input) {
     input = input.toLowerCase()

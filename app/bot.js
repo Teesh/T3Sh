@@ -1,7 +1,8 @@
 import Discord from 'discord.js'
 import Readline from 'readline'
 
-import { auth, settings } from '../config/config.js'
+import { settings } from '../config.js'
+import { auth } from '../auth.config.js'
 
 import Ping from './commands/ping.js'
 import Help from './commands/help.js'
