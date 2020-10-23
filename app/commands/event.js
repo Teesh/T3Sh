@@ -29,49 +29,95 @@ export default {
         if (max_phrase) {
             max = parseInt(max_phrase[0].split("=")[1].trim())
         }
+        inputs.replace(/\bm(ax)?( )?=( )?[0-9]{1,3}\b/g, "")
+        console.log(inputs)
         let event_moment = single(inputs)
         if (!event_moment) {
             message.channel.send("Failed to create event. Check the parameters")
             return
         }
-        let expire = event_moment.clone().add(1, 'd').format('MMMM Do, h:mm a')
+        console.log(event_moment)
         let event_date = event_moment.format('MMMM Do, h:mm a')
+        let expire_math = event_moment.clone().add(1, 'd').hour(0).minute(0)
+        let expire = expire_math.format('MMMM Do, h:mm a')
+        let expire_time = expire_math.diff(event_moment)
+        console.log(expire)
         
         let event = {
             name: event_name,
             date: event_date,
             max: max,
             expire: expire,
-            attendees: []
+            attendees: [],
+            declined: [],
         }
         let embed = _makeEmbed(message, event)
         let msg
+        let shortMsg
         let channel = message.guild.channels.cache.find(c => c.name.toLowerCase() === settings.default_calendar_channel)
         try {
             msg = await channel.send(embed)
-            await message.channel.send(_makeShortEmbed(msg, event, channel))
+            shortMsg = await message.channel.send(_makeShortEmbed(msg, event, channel))
         } catch  (e) {
             console.error(e)
         }
         msg.react('✅')
+        msg.react('❌')
+        msg.react('🗑️')
         let filter = (reaction, user) => {
             return user.id !== msg.author.id  && attendanceEmojis.includes(reaction.emoji.name)
         }
-        let collector = msg.createReactionCollector(filter, { dispose: true, time: expire*86400000 })
+        let collector = msg.createReactionCollector(filter, { dispose: true, time: expire_time })
         collector.on('collect', (reaction, user) => {
             console.log(`Collected ${reaction.emoji.name} from ${user.tag}`)
-            event.attendees.push(user.id)
+            if (reaction.emoji.name == "✅") {
+                event.attendees.push(user.id)
+                let idx = event.declined.indexOf(user.id)
+                if (idx != -1) {
+                    event.declined.splice(idx)
+                    let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
+                    for ( let r of userReacts) {
+                        if (r[0] == "❌") r[1].users.remove(user.id)
+                    }
+                }
+            } else if (reaction.emoji.name == "❌") {
+                event.declined.push(user.id)
+                let idx = event.attendees.indexOf(user.id)
+                if (idx != -1) {
+                    event.attendees.splice(idx)
+                    let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
+                    for ( let r of userReacts) {
+                        if (r[0] == "✅") r[1].users.remove(user.id)
+                    }
+                }
+            } else if (reaction.emoji.name == "🗑️") {
+                if (message.author.id === user.id) {
+                    collector.stop()
+                    return
+                } else {
+                    let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
+                    for ( let r of userReacts) {
+                        if (r[0] == "🗑️") r[1].users.remove(user.id)
+                    }
+                }
+            }
             msg.edit(_makeEmbed(message, event))
         })
         
         collector.on('remove', (reaction, user) => {
             console.log(`Removed ${reaction.emoji.name} from ${user.tag}`)
-            let idx = event.attendees.indexOf(user.id)
-            event.attendees.splice(idx)
+            if (reaction.emoji.name == "✅") {
+                let idx = event.attendees.indexOf(user.id)
+                if (idx != -1) event.attendees.splice(idx)
+            } else if (reaction.emoji.name == "❌") {
+                let idx = event.declined.indexOf(user.id)
+                if (idx != -1) event.declined.splice(idx)
+            }
             msg.edit(_makeEmbed(message, event))
         })
 
         collector.on('end', collected => {
+            shortMsg.edit(_makeShortEmbed(msg, event, channel, true))
             msg.delete()
         })
     }
@@ -82,7 +128,7 @@ function _makeEmbed (message, event) {
         .setColor("#7851a9")
         .setTitle(event.name)
         .setFooter(
-            `Ends ${moment(message.createdAt).add(event.expire, 'd').format('MMM Do, h:mm a')}`
+            `Ends ${event.expire}`
         )
     embed.addFields({
         name: `:calendar_spiral: ${event.date}`,
@@ -99,16 +145,29 @@ function _makeEmbed (message, event) {
     }
     embed.addFields({
         name: `:white_check_mark: Attendees (${event.attendees.length}${max_str})`,
-        value: value
+        value: value,
+        inline: true
+    })
+    value = ""
+    if (!event.declined.length) value = "> None"
+    for (let user in event.declined) {
+        value += `> <@!${event.declined[user]}>\n`
+    }
+    embed.addFields({
+        name: `:x: Declined (${event.declined.length})`,
+        value: value,
+        inline: true
     })
     return embed
 }
 
-function _makeShortEmbed (message, event, channel) {
+function _makeShortEmbed (message, event, channel, expired) {
+    let exp = ""
+    if (expired) exp = "(expired)"
     const embed = new Discord.MessageEmbed()
       .setColor("#7851a9")
-      .setDescription(`Event [${event.name}](${message.url}) posted to ${channel}`)
+      .setDescription(`Event [${event.name}](${message.url}) posted to ${channel} ${exp}`)
     return embed
 }
 
-const attendanceEmojis = ["✅"]
+const attendanceEmojis = ["✅","❌","🗑️"]
