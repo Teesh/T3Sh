@@ -7,15 +7,15 @@ import { settings } from "../../config.js"
 export default {
 	name: 'poll',
     description: 'Ask a question with some options or with a phrase for the days',
-    alias: ['poll', 'ask', 'q', 'question'],
+    alias: ['poll', 'p', 'ask', 'question'],
 	async execute(original_message) {
         let message = original_message
         message.delete()
-        let args = message.content.substr(message.content.indexOf(' ') + 1)
+        let args = message.content.substr(message.content.indexOf(' ') + 1).replace(/ +(?= )/g,'')
         let poll_name
         let inputs
         try {
-            poll_name = args.split('[')[1].split(']')[0].trim().replace(/ +(?= )/g,'')
+            poll_name = args.split('[')[1].split(']')[0].trim()
             inputs = args.replace(" *\[[^]]*\] *", "")
         } catch {
             poll_name = "Poll"
@@ -50,7 +50,7 @@ export default {
         else channel = message.guild.channels.cache.find(c => c.name.toLowerCase() === settings.default_calendar_channel)
         try {
             msg = await channel.send(embed)
-            if (!persistent) message.channel.send(`Poll [${poll_name}] posted to the calendar`)
+            if (!persistent) await message.channel.send(_makeShortEmbed(msg, poll, channel))
         } catch  (e) {
             console.error(e)
         }
@@ -89,8 +89,7 @@ function _makeEmbed (message, poll) {
     const embed = new Discord.MessageEmbed()
         .setColor("#7851a9")
         .setFooter(
-            `Started ${moment(message.createdAt).format('MMM Do, h:mm:ss a')} | Expires ${moment(message.createdAt).add(poll.expire, 'd').format('MMM Do, h:mm a')}`,
-            'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQQz7ax3wmbuiV_hI-DArOdJTkSVcPNUXn4xQ&usqp=CAU'
+            `Started ${moment(message.createdAt).format('MMM Do, h:mm:ss a')} | Expires ${moment(message.createdAt).add(poll.expire, 'd').format('MMM Do, h:mm a')}`
         )
     embed.addFields({
         name: `:question: ${poll.name}`,
@@ -110,6 +109,13 @@ function _makeEmbed (message, poll) {
             value: value.slice(0, -2)
         })
     }
+    return embed
+}
+
+function _makeShortEmbed (message, poll, channel) {
+    const embed = new Discord.MessageEmbed()
+      .setColor("#7851a9")
+      .setDescription(`Poll [${poll.name}](${message.url}) posted to ${channel}`)
     return embed
 }
 

@@ -47,7 +47,7 @@ if (process.platform === "win32") {
 process.on("SIGINT", async function () {
     try {
         let channel = bot.channels.cache.find(c => c.name.toLowerCase() === settings.default_calendar_channel)
-        let messages = await channel.messages.fetch({ limit: 10 })
+        let messages = await channel.messages.fetch({ limit: 99 })
         await channel.bulkDelete(messages)
     } catch (e) {
         console.log(e)
