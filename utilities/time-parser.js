@@ -126,6 +126,7 @@ export function single (input) {
 }
 
 // TODO: Handle numerical input week(end)s
+// TODO: Handle CSV inputs
 export function range (input) {
     input = input.toLowerCase()
     let what_days = input.match(ranges)

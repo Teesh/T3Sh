@@ -74,7 +74,7 @@ function _makePollHelpEmbed () {
         The poll name can appear in any part of the command
         > +ask a, b, c, d [Name]
         
-        The case of the command does not matter, the case of the name and options are kept as is
+        The case of the command doesn't matter, the case of the name and options are kept as is
         > +Poll [Name] a, b, c, d
         > +ASk [Proper YELLING!] A, b, C, D`
     })
@@ -128,7 +128,7 @@ function _makeEventHelpEmbed () {
         The poll name can appear in any part of the command
         > +make at 7p [Name]
         
-        The case of the command and time does not matter, the case of the name is kept as is
+        The case of the command and time don't matter, the case of the name is kept as is
         > +creATE [Name] on Monday at 7PM`
     })
     embed.addFields({

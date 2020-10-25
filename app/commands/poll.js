@@ -4,6 +4,7 @@ import Discord from 'discord.js'
 import { range } from '../../utilities/time-parser.js'
 import { settings } from "../../config.js"
 
+// TODO: Have a way to add optioned polls to the calendar channel
 export default {
 	name: 'poll',
     description: 'Ask a question with some options or with a phrase for the days',
@@ -99,7 +100,7 @@ function _makeEmbed (message, poll) {
     for (let opt in poll.options) {
         // ██████             for reference, whatever the fuck this symbol is
         let count = (poll.reactions[opt].length/total)*50 || 0
-        // TODO: fix bug where progress bar changes lengths when receiving answers
+        // FIXME: fix bug where progress bar changes lengths when receiving answers
         let value = '[:'+_numToWord(parseInt(opt)+1)+':](http://google.com) `'+'█'.repeat(count)+' '.repeat(50-count)+'`\nUsers: '
         for (let user in poll.reactions[opt]) {
             value += '<@!'+poll.reactions[opt][user]+'>, '
@@ -117,13 +118,6 @@ function _makeShortEmbed (message, poll, channel) {
       .setColor("#7851a9")
       .setDescription(`Poll [${poll.name}](${message.url}) posted to ${channel}`)
     return embed
-}
-
-function _makeExpiredEmbed (poll) {
-    return new Discord.MessageEmbed()
-        .setColor("#7851a9")
-        .setTitle(`:question: ${poll.name}`)
-        .setDescription('Poll expired')
 }
 
 function _numToWord(number) {

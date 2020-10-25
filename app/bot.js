@@ -8,6 +8,7 @@ import Ping from './commands/ping.js'
 import Help from './commands/help.js'
 import Poll from './commands/poll.js'
 import Event from './commands/event.js'
+import Edit from './commands/event.js'
 
 let bot = new Discord.Client()
 
@@ -23,6 +24,7 @@ bot.on('message', message => {
             else if (Help.alias.includes(cmd)) Help.execute(message)
             else if (Poll.alias.includes(cmd)) Poll.execute(message)
             else if (Event.alias.includes(cmd)) Event.execute(message)
+            else if (Edit.alias.includes(cmd)) Edit.execute(message)
             else message.reply("I don't know that command!")
         } catch (error) {
             console.error(error)

@@ -3,9 +3,7 @@ import Discord from 'discord.js'
 
 import { single } from '../../utilities/time-parser.js'
 import { settings } from "../../config.js"
-/*
-*
-*/
+
 export default {
 	name: 'event',
     description: 'Create an event on a date with a guest list',
