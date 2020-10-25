@@ -62,6 +62,7 @@ if (process.argv[2] == "single" && process.argv[3]) {
             "next weekend",
             "3 weekends",
             "for 5 days",
+            "for next 3 days",
             "2 weeks",
             "next 4 days"
         ]
@@ -82,47 +83,3 @@ if (process.argv[2] == "single" && process.argv[3]) {
         }
     }
 }
-
-/* 
--ranges
-this week
-next week
-1 day
-3 days
-2 weekends
-4 weekdays
-this weekend
-next weekend
-1 week
-
--times
-at 12:00pm
-1:00a
-at 07:50p
-0900
-2350
-730p
-at 0730
-1030
-at 6
-at 7pm
-at 8 p
-
--days
-this monday
-next monday
-friday
-on tues
-today
-tomorrow
-
--relative time
-in 1 day
-in 2 days
-3 hours
-4 days
-in a day
-in an hour
-in 12 hours
-in 1 hour
-*/

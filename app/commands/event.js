@@ -9,11 +9,10 @@ import { settings } from "../../config.js"
 export default {
 	name: 'event',
     description: 'Create an event on a date with a guest list',
-    alias: ['event', 'make', 'e', 'create'],
+    alias: ['event', 'make', 'c', 'create'],
 	async execute(original_message) {
         let message = original_message
-        message.delete()
-        // console.log(message)
+        original_message.delete()
         let args = message.content.substr(message.content.indexOf(' ') + 1).replace(/ +(?= )/g,'')
         let event_name
         let inputs

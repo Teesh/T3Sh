@@ -10,7 +10,7 @@ export default {
     alias: ['poll', 'p', 'ask', 'question'],
 	async execute(original_message) {
         let message = original_message
-        message.delete()
+        original_message.delete()
         let args = message.content.substr(message.content.indexOf(' ') + 1).replace(/ +(?= )/g,'')
         let poll_name
         let inputs

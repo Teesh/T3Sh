@@ -1,6 +1,7 @@
 import moment from 'moment'
 import { settings } from '../config.js'
 
+// TODO: Handle date inputs
 export function single (input) {
     input = input.toLowerCase()
     let which_day = input.match(days)
@@ -198,4 +199,4 @@ export function range (input) {
 const days = /\b(((on|this|next) )?((to|mon|tue(s)?|wed(nes)?|thu(r)?(s)?|fri|sat(ur)?|sun))(day|morrow)?)|(in )?(a|[0-9]{1,2}) (day(s)?)\b/g
 const times = /\b((at )?[0-1]?[0-9]|2[0-3]):?([0-5][0-9])?(( )?[ap][m]?)?|(in )?([0-9]{1,2}|(a(n)?)) ((hour)(s)?)\b/g
 
-const ranges = /\b((a|all|this|next|for) )?(([1-9]) )?((day|week(end)?(day)?)(s)?)\b/g
+const ranges = /\b((for )?(a|all|this|next) )?(([1-9]) )?((day|week(end)?(day)?)(s)?)\b/g
