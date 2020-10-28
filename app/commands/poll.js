@@ -5,6 +5,8 @@ import { range } from '../../utilities/time-parser.js'
 import { settings } from "../../config.js"
 
 // TODO: Have a way to add optioned polls to the calendar channel
+// TODO: Handle users being @'d for request to answer
+// TODO: Add action to auto generate event from a poll option
 export default {
 	name: 'poll',
     description: 'Ask a question with some options or with a phrase for the days',
@@ -58,15 +60,39 @@ export default {
         for (let opt in poll.options) {
             msg.react(numberEmojis[parseInt(opt)+1])
         }
+        // if (!persistent) msg.react('📅')
+        msg.react('🗑️')
         let filter = (reaction, user) => {
             return user.id !== msg.author.id  && numberEmojis.includes(reaction.emoji.name)
         }
         let collector = msg.createReactionCollector(filter, { dispose: true, time: expire*86400000 })
         collector.on('collect', (reaction, user) => {
             console.log(`Collected ${reaction.emoji.name} from ${user.tag}`)
-            let index = numberEmojis.indexOf(reaction.emoji.name)-1
-            poll.reactions[index].push(user.id)
-            msg.edit(_makeEmbed(message, poll))
+            if (reaction.emoji.name == "📅") {
+                if (message.author.id === user.id) {
+                    
+                    return
+                } else {
+                    let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
+                    for ( let r of userReacts) {
+                        if (r[0] == "📅") r[1].users.remove(user.id)
+                    }
+                }
+            } else if (reaction.emoji.name == "🗑️") {
+                if (message.author.id === user.id) {
+                    collector.stop()
+                    return
+                } else {
+                    let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
+                    for ( let r of userReacts) {
+                        if (r[0] == "🗑️") r[1].users.remove(user.id)
+                    }
+                }
+            }  else {
+                let index = numberEmojis.indexOf(reaction.emoji.name)-1
+                poll.reactions[index].push(user.id)
+                msg.edit(_makeEmbed(message, poll))
+            }
         })
         
         collector.on('remove', (reaction, user) => {
@@ -85,7 +111,7 @@ export default {
     }
 }
 
-// message.author.avatarURL(message.author.avatar
+// message.author.avatarURL(message.author.avatar)
 function _makeEmbed (message, poll) {
     const embed = new Discord.MessageEmbed()
         .setColor("#7851a9")
@@ -133,5 +159,4 @@ function _numToWord(number) {
     if (number == 9) return "nine"
 }
 
-const numberEmojis = ["\u0030\ufe0f\u20e3", "\u0031\ufe0f\u20e3", "\u0032\ufe0f\u20e3", "\u0033\ufe0f\u20e3", "\u0034\ufe0f\u20e3", 
-                      "\u0035\ufe0f\u20e3", "\u0036\ufe0f\u20e3", "\u0037\ufe0f\u20e3", "\u0038\ufe0f\u20e3", "\u0039\ufe0f\u20e3"]
+const numberEmojis = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "📅", "🗑️"]

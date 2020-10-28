@@ -122,7 +122,11 @@ export function single (input) {
         if (settings.default_meridiem == "PM") default_hour += 12
         time = day.hour(default_hour).minute(default_minute)
     }
-    return time
+    return {
+        time: time,
+        which_day: which_day,
+        what_time: what_time
+    }
 }
 
 // TODO: Handle numerical input week(end)s

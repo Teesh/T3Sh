@@ -8,7 +8,6 @@ import Ping from './commands/ping.js'
 import Help from './commands/help.js'
 import Poll from './commands/poll.js'
 import Event from './commands/event.js'
-import Edit from './commands/event.js'
 
 let bot = new Discord.Client()
 
@@ -18,13 +17,12 @@ bot.once('ready', () => {
 
 bot.on('message', message => {
     if (message.content.substring(0, 1) == settings.invoke) {
-        var cmd = message.content.substr(1, message.content.indexOf(' ') - 1).toLowerCase() || message.content.substr(1).toLowerCase()
+        let cmd = message.content.substr(1, message.content.indexOf(' ') - 1).toLowerCase() || message.content.substr(1).toLowerCase()
         try {
             if (Ping.alias.includes(cmd)) Ping.execute(message)
             else if (Help.alias.includes(cmd)) Help.execute(message)
             else if (Poll.alias.includes(cmd)) Poll.execute(message)
             else if (Event.alias.includes(cmd)) Event.execute(message)
-            else if (Edit.alias.includes(cmd)) Edit.execute(message)
             else message.reply("I don't know that command!")
         } catch (error) {
             console.error(error)
@@ -36,7 +34,7 @@ bot.on('message', message => {
 bot.login(auth.token)
 
 if (process.platform === "win32") {
-    var rl = Readline.createInterface({
+    let rl = Readline.createInterface({
         input: process.stdin,
         output: process.stdout
     })
