@@ -1,88 +1,66 @@
 import moment from 'moment'
 import Discord from 'discord.js'
 
-import { single, range } from '../../utilities/time-parser.js'
-import { settings } from '../../config.js'
-import { addPoll } from '../../db/poll.js'
+import { settings } from "../../config.js"
 
+import db from "../../db/connect.js"
+
+// TODO: Have a way to add optioned polls to the calendar channel
 // TODO: Handle users being @'d for request to answer
 // TODO: Add action to auto generate event from a poll option
 export default {
-	name: 'poll',
+	name: 'ask',
     description: 'Ask a question with some options or with a phrase for the days',
-    alias: ['poll', 'p'],
+    alias: ['ask', 'question', 'q'],
 	async execute(original_message) {
         let message = original_message
         original_message.delete()
         let args = message.content.substr(message.content.indexOf(' ') + 1)
                     .replace(/ +(?= )/g,'') // remove multiple consecutive spaces
                     .replace(/["']/g, "") // replace quotes with brackets
-        let poll_name
+        let question_name
         let inputs
         try {
-            poll_name = args.split('[')[1].split(']')[0].trim()
+            question_name = args.split('[')[1].split(']')[0].trim()
             inputs = args.replace(" *\[[^]]*\] *", "")
         } catch {
-            poll_name = "Poll"
+            question_name = "Question"
             inputs = args.trim()
         }
-        console.log(`Creating poll: ${poll_name}`)
+        console.log(`Creating poll: ${question_name}`)
         let options = []
         let expire
-        if (inputs.indexOf(',') == -1) {
-            let option_set = range(inputs)
-            expire = option_set[option_set.length-1].diff(moment(), 'days') + 1
-            options = option_set.map(opt => opt.format('ddd Do'))
-        } else {
-            let option_set = []
-            let opts = inputs.split(',').map(s => s.trim().replace(/ +(?= )/g,''))
-            for (opt of opts) option_set.push(single(opt).time)
-            options = option_set.map(opt => opt.format('ddd Do'))
-            expire = option_set[option_set.length-1].diff(moment(), 'days') + 1
-        }
+        options = inputs.split(',').map(s => s.trim().replace(/ +(?= )/g,''))
+        expire = 7
         console.log('Poll options: ', options)
-        let poll = {
-            name: poll_name,
+        let question = {
+            name: question_name,
             options: options,
             reactions: {},
             expire: expire
         }
-        for (let opt in poll.options) poll.reactions[opt] = []
+        for (let opt in question.options) question.reactions[opt] = []
 
-        let embed = _makeEmbed(message, poll)
+        let embed = _makeEmbed(message, question)
         let msg
-        let channel = message.guild.channels.cache.find(c => c.name.toLowerCase() === settings.default_calendar_channel)
+        let channel = message.channel
         try {
             msg = await channel.send(embed)
-            await message.channel.send(_makeShortEmbed(msg, poll, channel))
+            if (!persistent) await message.channel.send(_makeShortEmbed(msg, question, channel))
         } catch  (e) {
             console.error(e)
         }
-        for (let opt in poll.options) {
+        for (let opt in question.options) {
             msg.react(numberEmojis[parseInt(opt)+1])
         }
-        // msg.react('📅')
         msg.react('🗑️')
-        // db insert
-        addPoll(msg.id, poll)
-
         let filter = (reaction, user) => {
             return user.id !== msg.author.id  && numberEmojis.includes(reaction.emoji.name)
         }
         let collector = msg.createReactionCollector(filter, { dispose: true, time: expire*86400000 })
         collector.on('collect', (reaction, user) => {
             console.log(`Collected ${reaction.emoji.name} from ${user.tag}`)
-            if (reaction.emoji.name == "📅") {
-                if (message.author.id === user.id) {
-                    
-                    return
-                } else {
-                    let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
-                    for ( let r of userReacts) {
-                        if (r[0] == "📅") r[1].users.remove(user.id)
-                    }
-                }
-            } else if (reaction.emoji.name == "🗑️") {
+            if (reaction.emoji.name == "🗑️") {
                 if (message.author.id === user.id) {
                     collector.stop()
                     return
@@ -94,21 +72,21 @@ export default {
                 }
             }  else {
                 let index = numberEmojis.indexOf(reaction.emoji.name)-1
-                poll.reactions[index].push(user.id)
-                msg.edit(_makeEmbed(message, poll))
+                question.reactions[index].push(user.id)
+                msg.edit(_makeEmbed(message, question))
             }
         })
         
         collector.on('remove', (reaction, user) => {
             console.log(`Removed ${reaction.emoji.name} from ${user.tag}`)
             let index = numberEmojis.indexOf(reaction.emoji.name)-1
-            let idx = poll.reactions[index].indexOf(user.id)
-            poll.reactions[index].splice(idx)
-            msg.edit(_makeEmbed(message, poll))
+            let idx = question.reactions[index].indexOf(user.id)
+            question.reactions[index].splice(idx)
+            msg.edit(_makeEmbed(message, question))
         })
 
         collector.on('end', collected => {
-            // msg.reactions.removeAll().catch(error => console.error('Failed to clear reactions: ', error));
+            if (persistent) return
             msg.delete()
         })
     }

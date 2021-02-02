@@ -2,14 +2,16 @@ import Discord from 'discord.js'
 import Readline from 'readline'
 
 import { settings } from '../config.js'
-import db from '../db/connect.js'
+import mongo from '../db/connect.js'
 
 import Ping from './commands/ping.js'
 import Help from './commands/help.js'
 import Poll from './commands/poll.js'
+import Ask from './commands/ask.js'
 import Event from './commands/event.js'
 
 let bot = new Discord.Client()
+await mongo.connect()
 
 bot.once('ready', () => {
     console.log('T3Sh ready')
@@ -25,6 +27,7 @@ bot.on('message', message => {
             if (Ping.alias.includes(cmd)) Ping.execute(message)
             else if (Help.alias.includes(cmd)) Help.execute(message)
             else if (Poll.alias.includes(cmd)) Poll.execute(message)
+            else if (Ask.alias.includes(cmd)) Ask.execute(message)
             else if (Event.alias.includes(cmd)) Event.execute(message)
             else message.reply("I don't know that command!")
         } catch (error) {
@@ -52,6 +55,7 @@ process.on("SIGINT", async function () {
         let channel = bot.channels.cache.find(c => c.name.toLowerCase() === settings.default_calendar_channel)
         let messages = await channel.messages.fetch({ limit: 99 })
         await channel.bulkDelete(messages)
+        await mongo.close()
     } catch (e) {
         console.log(e)
     }

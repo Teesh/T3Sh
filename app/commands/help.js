@@ -10,8 +10,10 @@ export default {
         let input = message.content.substr(message.content.indexOf(' ') + 1).replace(/ +(?= )/g,'').toLowerCase()
         if (["+", "-"].includes(input[0])) {
             message.channel.send(_makeDefaultHelpEmbed())
-        } else if (["poll", "p", "ask", "question"].includes(input)) {
+        } else if (["poll", "p"].includes(input)) {
             message.channel.send(_makePollHelpEmbed())
+        } else if (["ask", "question", "q"].includes(input)) {
+            message.channel.send(_makeQuestionHelpEmbed())
         } else if (["create", "c", "event", "make"].includes(input)) {
             message.channel.send(_makeEventHelpEmbed())
         }
@@ -59,34 +61,36 @@ function _makePollHelpEmbed () {
     const embed = new Discord.MessageEmbed()
       .setColor("#7851a9")
       .setTitle("T3Sh Poll Commands Help")
-      .setDescription("Ask a question with some options or with a phrase for the days")
+      .setDescription("Poll for game scheduling with some options or with a phrase for the days")
     embed.addFields({
         name: "Call poll",
-        value: `A poll can be called in one of 4 ways
-        > +poll, +ask, +question, +p
+        value: `A poll can be called in one of 2 ways
+        > +poll, +p
 
         The poll name MUST appear between brackets
-        > +question [Name] a, b, c
+        > +poll [Name] a, b, c
         
         The poll name is optional, it will default to [Poll]
         > +p a, b, c, d
         
         The poll name can appear in any part of the command
-        > +ask a, b, c, d [Name]
+        > +p a, b, c, d [Name]
         
         The case of the command doesn't matter, the case of the name and options are kept as is
-        > +Poll [Name] a, b, c, d
-        > +ASk [Proper YELLING!] A, b, C, D`
+        > +P [Name] a, b, c, d
+        > +PoLL [Proper YELLING!] A, b, C, D`
     })
     embed.addFields({
         name: "Poll by options",
-        value: `This poll does not post in the calendar
-        The poll can have up to 9 options
+        value: `The poll can have up to 9 options
         > +poll [Poll name] opt1, opt 2, opt_3, ... , opt 9
         
         The bot recognizes anything with a comma as being multiple options
         > poll option1, option 2, option 3 with extra words, option 4 with a 🥺
         
+        The options should be a recognizable day of the week for auto-scheduling
+        > poll [Name] Mon, tue, WEDNESDAY, Thurs, friday 
+
         The options MUST be separated by commas to be separate options
         > poll [Name] a, b, c, d`
     })
@@ -105,6 +109,51 @@ function _makePollHelpEmbed () {
         Add "next" in front to a phrase to skip the current day or week
         > +poll [Name] next 3 days (skips current day)
         > +poll [Name] next week (next Monday to Sunday)`
+    })
+    return embed
+}
+
+function _makeQuestionHelpEmbed () {
+    const embed = new Discord.MessageEmbed()
+      .setColor("#7851a9")
+      .setTitle("T3Sh Question Commands Help")
+      .setDescription("Ask a question with some options")
+    embed.addFields({
+        name: "Ask question",
+        value: `Questions do not post in the calendar
+        A question can be asked in one of 3 ways
+        > +ask, +question, +q
+
+        The poll name MUST appear between brackets
+        > +question [Name] a, b, c
+        
+        The question name is optional, it will default to "Question"
+        > +q a, b, c, d
+        
+        The poll name can appear in any part of the command
+        > +ask a, b, c, d [Name]
+        
+        The case of the command doesn't matter, the case of the name and options are kept as is
+        > +Q [Name] a, b, c, d
+        > +ASk [Proper YELLING!] A, b, C, D`
+    })
+    embed.addFields({
+        name: "Ask with options",
+        value: `The poll can have up to 9 options
+        > +poll [Poll name] opt1, opt 2, opt_3, ... , opt 9
+        
+        The bot recognizes anything with a comma as being multiple options
+        > poll option1, option 2, option 3 with extra words, option 4 with a 🥺
+        
+        The options MUST be separated by commas to be separate options
+        > poll [Name] a, b, c, d`
+    })
+    embed.addFields({
+        name: "Ask without options",
+        value: `Questions asked without options default to Yes and No
+        The following 2 are equivalent
+        > +ask "Should we start a new channel?"
+        > +q "Should we start a new channel?" Yes, No`
     })
     return embed
 }
