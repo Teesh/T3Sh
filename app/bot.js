@@ -2,12 +2,14 @@ import Discord from 'discord.js'
 import Readline from 'readline'
 
 import { settings } from '../config.js'
-import { auth } from '../auth.config.js'
+import dotenv from 'dotenv'
 
 import Ping from './commands/ping.js'
 import Help from './commands/help.js'
 import Poll from './commands/poll.js'
 import Event from './commands/event.js'
+
+dotenv.config()
 
 let bot = new Discord.Client()
 
@@ -31,7 +33,7 @@ bot.on('message', message => {
     }
 })
 
-bot.login(auth.token)
+bot.login(process.env.DISCORD_BOT_TOKEN)
 
 if (process.platform === "win32") {
     let rl = Readline.createInterface({

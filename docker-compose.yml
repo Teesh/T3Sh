@@ -1,0 +1,9 @@
+version: '3'
+services:
+  db:
+    image: mongo
+    container_name: mongo_db
+  bot:
+    image: tesh:latest
+    container_name: tesh_bot
+    
