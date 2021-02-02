@@ -1,9 +1,17 @@
 version: '3'
 services:
   db:
-    image: mongo
+    image: mongo:latest
     container_name: mongo_db
+    ports:
+      - 27017:27017
+    volumes:
+      - ./data/mongodb:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD
   bot:
-    image: tesh:latest
+    build: .
     container_name: tesh_bot
-    
+    environment:
+      - DB_HOST=db:27017

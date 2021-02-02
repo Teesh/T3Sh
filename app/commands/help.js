@@ -8,11 +8,11 @@ export default {
         let message = original_message
         original_message.delete()
         let input = message.content.substr(message.content.indexOf(' ') + 1).replace(/ +(?= )/g,'').toLowerCase()
-        if (input[0] == "+") {
+        if (["+", "-"].includes(input[0])) {
             message.channel.send(_makeDefaultHelpEmbed())
-        } else if (input == "poll" || input == "p" || input == "ask" || input == "question") {
+        } else if (["poll", "p", "ask", "question"].includes(input)) {
             message.channel.send(_makePollHelpEmbed())
-        } else if (input == "create" || input == "c" || input == "event" || input == "make") {
+        } else if (["create", "c", "event", "make"].includes(input)) {
             message.channel.send(_makeEventHelpEmbed())
         }
     }

@@ -2,14 +2,12 @@ import Discord from 'discord.js'
 import Readline from 'readline'
 
 import { settings } from '../config.js'
-import dotenv from 'dotenv'
+import db from '../db/connect.js'
 
 import Ping from './commands/ping.js'
 import Help from './commands/help.js'
 import Poll from './commands/poll.js'
 import Event from './commands/event.js'
-
-dotenv.config()
 
 let bot = new Discord.Client()
 
@@ -18,7 +16,10 @@ bot.once('ready', () => {
 })
 
 bot.on('message', message => {
-    if (message.content.substring(0, 1) == settings.invoke) {
+    let invoke
+    if (process.env.NODE_ENV == "production") invoke = settings.invoke
+    else if (process.env.NODE_ENV == "development") invoke = "-"
+    if (message.content.substring(0, 1) == invoke) {
         let cmd = message.content.substr(1, message.content.indexOf(' ') - 1).toLowerCase() || message.content.substr(1).toLowerCase()
         try {
             if (Ping.alias.includes(cmd)) Ping.execute(message)

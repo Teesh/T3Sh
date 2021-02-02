@@ -6,7 +6,7 @@ import { settings } from "../../config.js"
 
 // TODO: Add voice channel link to event
 // TODO: Add game recognition to event
-// TODO: Handle users being @'d as request to attend
+// TODO: Handle users/roles being @'d as request to attend
 export default {
 	name: 'event',
     description: 'Create an event on a date with a guest list',
