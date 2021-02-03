@@ -10,6 +10,11 @@ import Poll from './commands/poll.js'
 import Ask from './commands/ask.js'
 import Event from './commands/event.js'
 
+import { addReply as addPollReply, removeReply as RemovePollReply } from '../db/poll.js'
+import { makeEmbed as pollEmbed } from './commands/poll.js'
+import { pollEmojis, eventEmojis, deleteEmoji } from '../utilities/helpers.js'
+import event from './commands/event.js'
+
 let bot = new Discord.Client()
 await mongo.connect()
 
@@ -35,6 +40,39 @@ bot.on('message', message => {
             message.reply("Something went wrong")
         }
     }
+})
+
+bot.on('messageReactionAdd', async (reaction, user) => {
+    if (reaction.partial) {
+		// If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.error('Something went wrong when fetching the message: ', error);
+			return;
+		}
+    }
+    if (user.id === reaction.message.author.id) return // ignore bot replies
+    if (eventEmojis.includes(reaction.emoji.name)) addEventReply(reaction, user)
+    else if (pollEmojis.includes(reaction.emoji.name)) {
+        let updatedPoll = await addPollReply(reaction, user)
+        reaction.message.edit(pollEmbed(updatedPoll.message, updatedPoll))
+    }
+    else if (reaction.emoji.name == deleteEmoji) deleteMessage(reaction, user)
+})
+
+bot.on('messageReactionRemove', async (reaction, user) => {
+    if (reaction.partial) {
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.error('Something went wrong when fetching the message: ', error);
+			return;
+		}
+    }
+    if (user.id === reaction.message.author.id) return // ignore bot replies
+    if (eventEmojis.includes(reaction.emoji.name)) removeEventReply(reaction, user)
+    else if (pollEmojis.includes(reaction.emoji.name)) removePollReply(reaction, user)
 })
 
 bot.login(process.env.DISCORD_BOT_TOKEN)

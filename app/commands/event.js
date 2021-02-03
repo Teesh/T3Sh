@@ -4,6 +4,8 @@ import Discord from 'discord.js'
 import { single } from '../../utilities/time-parser.js'
 import { settings } from "../../config.js"
 
+import { eventEmojis } from '../../utilities/helpers.js'
+
 // TODO: Add voice channel link to event
 // TODO: Add game recognition to event
 // TODO: Handle users/roles being @'d as request to attend
@@ -63,7 +65,7 @@ export default {
         msg.react('📝')
         msg.react('🗑️')
         let filter = (reaction, user) => {
-            return user.id !== msg.author.id  && attendanceEmojis.includes(reaction.emoji.name)
+            return user.id !== msg.author.id  && eventEmojis.includes(reaction.emoji.name)
         }
         let collector = msg.createReactionCollector(filter, { dispose: true, time: expire_time })
         collector.on('collect', async (reaction, user) => {
@@ -250,5 +252,3 @@ function _makeEditEmbed (message, bot_message, event, edited) {
       .setDescription(val)
     return embed
 }
-
-const attendanceEmojis = ["✅","❌","📝", "🗑️"]

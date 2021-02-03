@@ -5,6 +5,8 @@ import { single, range } from '../../utilities/time-parser.js'
 import { settings } from '../../config.js'
 import { addPoll } from '../../db/poll.js'
 
+import { numToWord, pollEmojis } from '../../utilities/helpers.js'
+
 // TODO: Handle users being @'d for request to answer
 // TODO: Add action to auto generate event from a poll option
 export default {
@@ -42,6 +44,16 @@ export default {
         }
         console.log('Poll options: ', options)
         let poll = {
+            message: {
+                id: message.id,
+                author: {
+                    id: message.author.id
+                },
+                createdAt: message.createdAt,
+                channel: {
+                    id: message.channel.id
+                },
+            },
             name: poll_name,
             options: options,
             reactions: {},
@@ -49,17 +61,17 @@ export default {
         }
         for (let opt in poll.options) poll.reactions[opt] = []
 
-        let embed = _makeEmbed(message, poll)
+        let embed = makeEmbed(message, poll)
         let msg
         let channel = message.guild.channels.cache.find(c => c.name.toLowerCase() === settings.default_calendar_channel)
         try {
             msg = await channel.send(embed)
-            await message.channel.send(_makeShortEmbed(msg, poll, channel))
+            await message.channel.send(makeShortEmbed(msg, poll, channel))
         } catch  (e) {
             console.error(e)
         }
         for (let opt in poll.options) {
-            msg.react(numberEmojis[parseInt(opt)+1])
+            msg.react(pollEmojis[parseInt(opt)+1])
         }
         // msg.react('📅')
         msg.react('🗑️')
@@ -67,45 +79,45 @@ export default {
         addPoll(msg.id, poll)
 
         let filter = (reaction, user) => {
-            return user.id !== msg.author.id  && numberEmojis.includes(reaction.emoji.name)
+            return user.id !== msg.author.id  && pollEmojis.includes(reaction.emoji.name)
         }
         let collector = msg.createReactionCollector(filter, { dispose: true, time: expire*86400000 })
-        collector.on('collect', (reaction, user) => {
-            console.log(`Collected ${reaction.emoji.name} from ${user.tag}`)
-            if (reaction.emoji.name == "📅") {
-                if (message.author.id === user.id) {
+        // collector.on('collect', (reaction, user) => {
+        //     console.log(`Collected ${reaction.emoji.name} from ${user.tag}`)
+        //     if (reaction.emoji.name == "📅") {
+        //         if (message.author.id === user.id) {
                     
-                    return
-                } else {
-                    let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
-                    for ( let r of userReacts) {
-                        if (r[0] == "📅") r[1].users.remove(user.id)
-                    }
-                }
-            } else if (reaction.emoji.name == "🗑️") {
-                if (message.author.id === user.id) {
-                    collector.stop()
-                    return
-                } else {
-                    let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
-                    for ( let r of userReacts) {
-                        if (r[0] == "🗑️") r[1].users.remove(user.id)
-                    }
-                }
-            }  else {
-                let index = numberEmojis.indexOf(reaction.emoji.name)-1
-                poll.reactions[index].push(user.id)
-                msg.edit(_makeEmbed(message, poll))
-            }
-        })
+        //             return
+        //         } else {
+        //             let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
+        //             for ( let r of userReacts) {
+        //                 if (r[0] == "📅") r[1].users.remove(user.id)
+        //             }
+        //         }
+        //     } else if (reaction.emoji.name == "🗑️") {
+        //         if (message.author.id === user.id) {
+        //             collector.stop()
+        //             return
+        //         } else {
+        //             let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
+        //             for ( let r of userReacts) {
+        //                 if (r[0] == "🗑️") r[1].users.remove(user.id)
+        //             }
+        //         }
+        //     }  else {
+        //         let index = pollEmojis.indexOf(reaction.emoji.name)-1
+        //         poll.reactions[index].push(user.id)
+        //         msg.edit(makeEmbed(message, poll))
+        //     }
+        // })
         
-        collector.on('remove', (reaction, user) => {
-            console.log(`Removed ${reaction.emoji.name} from ${user.tag}`)
-            let index = numberEmojis.indexOf(reaction.emoji.name)-1
-            let idx = poll.reactions[index].indexOf(user.id)
-            poll.reactions[index].splice(idx)
-            msg.edit(_makeEmbed(message, poll))
-        })
+        // collector.on('remove', (reaction, user) => {
+        //     console.log(`Removed ${reaction.emoji.name} from ${user.tag}`)
+        //     let index = pollEmojis.indexOf(reaction.emoji.name)-1
+        //     let idx = poll.reactions[index].indexOf(user.id)
+        //     poll.reactions[index].splice(idx)
+        //     msg.edit(makeEmbed(message, poll))
+        // })
 
         collector.on('end', collected => {
             // msg.reactions.removeAll().catch(error => console.error('Failed to clear reactions: ', error));
@@ -115,7 +127,7 @@ export default {
 }
 
 // message.author.avatarURL(message.author.avatar)
-function _makeEmbed (message, poll) {
+export function makeEmbed (message, poll) {
     const embed = new Discord.MessageEmbed()
         .setColor("#7851a9")
         .setFooter(
@@ -123,14 +135,14 @@ function _makeEmbed (message, poll) {
         )
     embed.addFields({
         name: `:question: ${poll.name}`,
-        value: `asked by <@!${message.author.id}> in ${message.channel}`
+        value: `asked by <@!${message.author.id}> in <#${message.channel.id}>`
     })
     let total = Object.keys(poll.reactions).map(key => poll.reactions[key].length).reduce((p, c) => p + c, 0)
     for (let opt in poll.options) {
         // ██████             for reference, whatever the fuck this symbol is
         let count = (poll.reactions[opt].length/total)*50 || 0
         // FIXME: fix bug where progress bar changes lengths when receiving answers
-        let value = '[:'+_numToWord(parseInt(opt)+1)+':](http://google.com) `'+'█'.repeat(count)+' '.repeat(50-count)+'`\nUsers: '
+        let value = '[:'+numToWord(parseInt(opt)+1)+':](http://google.com) `'+'█'.repeat(count)+' '.repeat(50-count)+'`\nUsers: '
         for (let user in poll.reactions[opt]) {
             value += '<@!'+poll.reactions[opt][user]+'>, '
         }
@@ -142,24 +154,9 @@ function _makeEmbed (message, poll) {
     return embed
 }
 
-function _makeShortEmbed (message, poll, channel) {
+export function makeShortEmbed (message, poll, channel) {
     const embed = new Discord.MessageEmbed()
       .setColor("#7851a9")
-      .setDescription(`Poll [${poll.name}](${message.url}) posted to ${channel}`)
+      .setDescription(`Poll [${poll.name}](${message.url}) posted to <#${message.channel.id}>`)
     return embed
 }
-
-function _numToWord(number) {
-    if (number == 0) return "zero"
-    if (number == 1) return "one"
-    if (number == 2) return "two"
-    if (number == 3) return "three"
-    if (number == 4) return "four"
-    if (number == 5) return "five"
-    if (number == 6) return "six"
-    if (number == 7) return "seven"
-    if (number == 8) return "eight"
-    if (number == 9) return "nine"
-}
-
-const numberEmojis = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "📅", "🗑️"]
