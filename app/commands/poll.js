@@ -77,52 +77,6 @@ export default {
         msg.react('🗑️')
         // db insert
         addPoll(msg.id, poll)
-
-        let filter = (reaction, user) => {
-            return user.id !== msg.author.id  && pollEmojis.includes(reaction.emoji.name)
-        }
-        // let collector = msg.createReactionCollector(filter, { dispose: true, time: expire*86400000 })
-        // collector.on('collect', (reaction, user) => {
-        //     console.log(`Collected ${reaction.emoji.name} from ${user.tag}`)
-        //     if (reaction.emoji.name == "📅") {
-        //         if (message.author.id === user.id) {
-                    
-        //             return
-        //         } else {
-        //             let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
-        //             for ( let r of userReacts) {
-        //                 if (r[0] == "📅") r[1].users.remove(user.id)
-        //             }
-        //         }
-        //     } else if (reaction.emoji.name == "🗑️") {
-        //         if (message.author.id === user.id) {
-        //             collector.stop()
-        //             return
-        //         } else {
-        //             let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
-        //             for ( let r of userReacts) {
-        //                 if (r[0] == "🗑️") r[1].users.remove(user.id)
-        //             }
-        //         }
-        //     }  else {
-        //         let index = pollEmojis.indexOf(reaction.emoji.name)-1
-        //         poll.reactions[index].push(user.id)
-        //         msg.edit(makeEmbed(message, poll))
-        //     }
-        // })
-        
-        // collector.on('remove', (reaction, user) => {
-        //     console.log(`Removed ${reaction.emoji.name} from ${user.tag}`)
-        //     let index = pollEmojis.indexOf(reaction.emoji.name)-1
-        //     let idx = poll.reactions[index].indexOf(user.id)
-        //     poll.reactions[index].splice(idx)
-        //     msg.edit(makeEmbed(message, poll))
-        // })
-
-        // collector.on('end', collected => {
-        //     // msg.reactions.removeAll().catch(error => console.error('Failed to clear reactions: ', error));
-        //     msg.delete()
-        // })
     }
 }
 

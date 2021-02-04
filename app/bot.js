@@ -18,7 +18,7 @@ import { userDeleteEmbed } from '../db/general.js'
 import { pollEmojis, eventEmojis, deleteEmoji, editEmoji } from '../utilities/helpers.js'
 import event from './commands/event.js'
 
-let bot = new Discord.Client()
+let bot = new Discord.Client({ partials: ['USER', 'MESSAGE', 'CHANNEL', 'REACTION'] })
 await mongo.connect()
 
 bot.once('ready', () => {
@@ -46,16 +46,18 @@ bot.on('message', message => {
 })
 
 bot.on('messageReactionAdd', async (reaction, user) => {
+    console.log(user)
     if (reaction.partial) {
 		// If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
 		try {
-			await reaction.fetch();
+            await reaction.fetch()
 		} catch (error) {
-			console.error('Something went wrong when fetching the message: ', error);
+			console.error('Something went wrong when fetching the message: ', error)
 			return;
 		}
     }
     if (user.id === reaction.message.author.id) return // ignore bot replies
+    console.log(`Collected add ${reaction.emoji.name} from ${user.tag || user.id}`)
     if (eventEmojis.includes(reaction.emoji.name)) {
         let updatedEvent = await addEventReply(reaction, user)
         reaction.message.edit(eventEmbed(updatedEvent.message, updatedEvent))
@@ -71,15 +73,17 @@ bot.on('messageReactionAdd', async (reaction, user) => {
 })
 
 bot.on('messageReactionRemove', async (reaction, user) => {
+    console.log(user)
     if (reaction.partial) {
 		try {
-			await reaction.fetch();
+			await reaction.fetch()
 		} catch (error) {
-			console.error('Something went wrong when fetching the message: ', error);
+			console.error('Something went wrong when fetching the message: ', error)
 			return;
 		}
     }
     if (user.id === reaction.message.author.id) return // ignore bot replies
+    console.log(`Collected remove ${reaction.emoji.name} from ${user.tag || user.id}`)
     if (eventEmojis.includes(reaction.emoji.name)) {
         let updatedEvent = await removeEventReply(reaction, user)
         reaction.message.edit(eventEmbed(updatedEvent.message, updatedEvent))
@@ -109,7 +113,7 @@ process.on("SIGINT", async function () {
     try {
         let channel = bot.channels.cache.find(c => c.name.toLowerCase() === settings.default_calendar_channel)
         let messages = await channel.messages.fetch({ limit: 99 })
-        await channel.bulkDelete(messages)
+        // await channel.bulkDelete(messages)
         await mongo.close()
     } catch (e) {
         console.log(e)

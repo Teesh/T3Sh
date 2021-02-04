@@ -28,14 +28,10 @@ export async function addReply(reaction, user) {
         try {
             output = await db.collection("events").findOneAndUpdate(
                 { _id: reaction.message.id },
-                { $push: { "attendees": user.id },
-                  $pull: { "declined": user.id } },
+                { $push: { "attendees": user.id } },
                 { returnOriginal: false },
             )
-            let userReacts = reaction.message.reactions.cache.filter(r => r.users.cache.has(user.id))
-            for ( let r of userReacts) {
-                if (r[0] == "❌") r[1].users.remove(user.id)
-            }
+            reaction.message.reactions.resolve("❌").users.remove(user.id)
         } catch (e) {
             console.error(e)
         } finally {
@@ -45,14 +41,10 @@ export async function addReply(reaction, user) {
         try {
             output = await db.collection("events").findOneAndUpdate(
                 { _id: reaction.message.id },
-                { $push: { "declined": user.id },
-                  $pull: { "attendees": user.id } },
+                { $push: { "declined": user.id } },
                 { returnOriginal: false },
             )
-            let userReacts = reaction.message.reactions.cache.filter(r => r.users.cache.has(user.id))
-            for ( let r of userReacts) {
-                if (r[0] == "✅") r[1].users.remove(user.id)
-            }
+            reaction.message.reactions.resolve("✅").users.remove(user.id)
         } catch (e) {
             console.error(e)
         } finally {
