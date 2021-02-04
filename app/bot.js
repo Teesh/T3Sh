@@ -10,7 +10,7 @@ import Poll from './commands/poll.js'
 import Ask from './commands/ask.js'
 import Event from './commands/event.js'
 
-import { addReply as addPollReply, removeReply as RemovePollReply } from '../db/poll.js'
+import { addReply as addPollReply, removeReply as removePollReply } from '../db/poll.js'
 import { makeEmbed as pollEmbed } from './commands/poll.js'
 import { pollEmojis, eventEmojis, deleteEmoji } from '../utilities/helpers.js'
 import event from './commands/event.js'
@@ -72,7 +72,10 @@ bot.on('messageReactionRemove', async (reaction, user) => {
     }
     if (user.id === reaction.message.author.id) return // ignore bot replies
     if (eventEmojis.includes(reaction.emoji.name)) removeEventReply(reaction, user)
-    else if (pollEmojis.includes(reaction.emoji.name)) removePollReply(reaction, user)
+    else if (pollEmojis.includes(reaction.emoji.name)) {
+        let updatedPoll = await removePollReply(reaction, user)
+        reaction.message.edit(pollEmbed(updatedPoll.message, updatedPoll))
+    }
 })
 
 bot.login(process.env.DISCORD_BOT_TOKEN)
