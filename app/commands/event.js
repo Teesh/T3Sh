@@ -214,10 +214,10 @@ export function makeEmbed (message, event) {
         )
     embed.addFields({
         name: `:calendar_spiral: ${event.date}`,
-        value: `started by <@!${message.author.id}> in ${message.channel}`
+        value: `started by <@!${message.author.id}> in <#${message.channel.id}>`
     })
     let max_str = ''
-    if (event.max !== undefined) {
+    if (event.max !== undefined && event.max !== null) {
         max_str = `/${event.max}`
     }
     let value = ""
@@ -248,7 +248,7 @@ export function makeShortEmbed (message, event, channel, expired) {
     if (expired) exp = "(expired)"
     const embed = new Discord.MessageEmbed()
       .setColor("#7851a9")
-      .setDescription(`Event [${event.name}](${message.url}) posted to ${channel} ${exp}`)
+      .setDescription(`Event [${event.name}](${message.url}) posted to <#${channel.id}> ${exp}`)
     return embed
 }
 

@@ -11,11 +11,11 @@ import Ask from './commands/ask.js'
 import Event from './commands/event.js'
 
 import { addReply as addPollReply, removeReply as removePollReply } from '../db/poll.js'
-import { addReply as addEventReply, removeReply as removeEventReply } from '../db/event.js'
+import { addReply as addEventReply, removeReply as removeEventReply, editEvent } from '../db/event.js'
 import { makeEmbed as pollEmbed } from './commands/poll.js'
 import { makeEmbed as eventEmbed } from './commands/event.js'
 import { userDeleteEmbed } from '../db/general.js' 
-import { pollEmojis, eventEmojis, deleteEmoji } from '../utilities/helpers.js'
+import { pollEmojis, eventEmojis, deleteEmoji, editEmoji } from '../utilities/helpers.js'
 import event from './commands/event.js'
 
 let bot = new Discord.Client()
@@ -65,6 +65,8 @@ bot.on('messageReactionAdd', async (reaction, user) => {
     }
     else if (reaction.emoji.name == deleteEmoji) {
         userDeleteEmbed(reaction, user)
+    } else if (reaction.emoji.name == editEmoji) {
+        editEvent(reaction, user)
     }
 })
 
