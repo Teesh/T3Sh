@@ -3,6 +3,7 @@ import Discord from 'discord.js'
 
 import { single } from '../../utilities/time-parser.js'
 import { settings } from "../../config.js"
+import { addEvent } from '../../db/event.js'
 
 import { eventEmojis } from '../../utilities/helpers.js'
 
@@ -43,6 +44,16 @@ export default {
         let expire_time = expire_math.diff(moment())
         
         let event = {
+            message: {
+                id: message.id,
+                author: {
+                    id: message.author.id
+                },
+                createdAt: message.createdAt,
+                channel: {
+                    id: message.channel.id
+                },
+            },
             name: event_name,
             date: event_date,
             max: max,
@@ -50,13 +61,13 @@ export default {
             attendees: [],
             declined: [],
         }
-        let embed = _makeEmbed(message, event)
+        let embed = makeEmbed(message, event)
         let msg
         let shortMsg
         let channel = message.guild.channels.cache.find(c => c.name.toLowerCase() === settings.default_calendar_channel)
         try {
             msg = await channel.send(embed)
-            shortMsg = await message.channel.send(_makeShortEmbed(msg, event, channel))
+            shortMsg = await message.channel.send(makeShortEmbed(msg, event, channel))
         } catch  (e) {
             console.error(e)
         }
@@ -64,136 +75,137 @@ export default {
         msg.react('❌')
         msg.react('📝')
         msg.react('🗑️')
-        let filter = (reaction, user) => {
-            return user.id !== msg.author.id  && eventEmojis.includes(reaction.emoji.name)
-        }
-        let collector = msg.createReactionCollector(filter, { dispose: true, time: expire_time })
-        collector.on('collect', async (reaction, user) => {
-            if (reaction.emoji.name == "✅") {
-                event.attendees.push(user.id)
-                let idx = event.declined.indexOf(user.id)
-                if (idx != -1) {
-                    event.declined.splice(idx)
-                    let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
-                    for ( let r of userReacts) {
-                        if (r[0] == "❌") r[1].users.remove(user.id)
-                    }
-                }
-            } else if (reaction.emoji.name == "❌") {
-                event.declined.push(user.id)
-                let idx = event.attendees.indexOf(user.id)
-                if (idx != -1) {
-                    event.attendees.splice(idx)
-                    let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
-                    for ( let r of userReacts) {
-                        if (r[0] == "✅") r[1].users.remove(user.id)
-                    }
-                }
-            } else if (reaction.emoji.name == "📝") {
-                if (message.author.id === user.id) {
-                    let editMsg = await message.channel.send(_makeEditEmbed(message, msg, event))
-                    let editCollector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 120000 })
-                    editCollector.on('collect', m => {
-                        let cmd = m.content.substr(0, m.content.indexOf(' ')).toLowerCase()
-                        if (['e', 'edit'].includes(cmd)) {
-                            let args = m.content.substr(m.content.indexOf(' ') + 1).replace(/ +(?= )/g,'')
-                            if (!args) return
-                            let event_name
-                            let inputs
-                            try {
-                                event_name = args.split('[')[1].split(']')[0].trim()
-                                inputs = args.replace(" *\[[^]]*\] *", "")
-                            } catch {
-                                inputs = args.trim()
-                            }
-                            if (event_name) event.name = event_name
-                            let max
-                            let max_phrase = inputs.match(/\bm(ax)?( )?=( )?[0-9]{1,3}\b/g)
-                            if (max_phrase) {
-                                max = parseInt(max_phrase[0].split("=")[1].trim())
-                                event.max = max
-                            }
-                            inputs.replace(/\bm(ax)?( )?=( )?[0-9]{1,3}\b/g, "")
+        addEvent(msg.id, event)
+        // let filter = (reaction, user) => {
+        //     return user.id !== msg.author.id  && eventEmojis.includes(reaction.emoji.name)
+        // }
+        // let collector = msg.createReactionCollector(filter, { dispose: true, time: expire_time })
+        // collector.on('collect', async (reaction, user) => {
+        //     if (reaction.emoji.name == "✅") {
+        //         event.attendees.push(user.id)
+        //         let idx = event.declined.indexOf(user.id)
+        //         if (idx != -1) {
+        //             event.declined.splice(idx)
+        //             let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
+        //             for ( let r of userReacts) {
+        //                 if (r[0] == "❌") r[1].users.remove(user.id)
+        //             }
+        //         }
+        //     } else if (reaction.emoji.name == "❌") {
+        //         event.declined.push(user.id)
+        //         let idx = event.attendees.indexOf(user.id)
+        //         if (idx != -1) {
+        //             event.attendees.splice(idx)
+        //             let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
+        //             for ( let r of userReacts) {
+        //                 if (r[0] == "✅") r[1].users.remove(user.id)
+        //             }
+        //         }
+        //     } else if (reaction.emoji.name == "📝") {
+        //         if (message.author.id === user.id) {
+        //             let editMsg = await message.channel.send(makeEditEmbed(message, msg, event))
+        //             let editCollector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 120000 })
+        //             editCollector.on('collect', m => {
+        //                 let cmd = m.content.substr(0, m.content.indexOf(' ')).toLowerCase()
+        //                 if (['e', 'edit'].includes(cmd)) {
+        //                     let args = m.content.substr(m.content.indexOf(' ') + 1).replace(/ +(?= )/g,'')
+        //                     if (!args) return
+        //                     let event_name
+        //                     let inputs
+        //                     try {
+        //                         event_name = args.split('[')[1].split(']')[0].trim()
+        //                         inputs = args.replace(" *\[[^]]*\] *", "")
+        //                     } catch {
+        //                         inputs = args.trim()
+        //                     }
+        //                     if (event_name) event.name = event_name
+        //                     let max
+        //                     let max_phrase = inputs.match(/\bm(ax)?( )?=( )?[0-9]{1,3}\b/g)
+        //                     if (max_phrase) {
+        //                         max = parseInt(max_phrase[0].split("=")[1].trim())
+        //                         event.max = max
+        //                     }
+        //                     inputs.replace(/\bm(ax)?( )?=( )?[0-9]{1,3}\b/g, "")
 
-                            let event_edit = single(inputs)
-                            if (event_edit != -1) {
-                                let old_event_moment = event_moment.clone()
-                                let new_event_moment = event_edit.time
-                                let which_day = event_edit.which_day
-                                let what_time = event_edit.what_time
-                                if (!new_event_moment) {
-                                    // TODO: edit error here 
-                                    return
-                                }
-                                if (which_day && what_time) {
-                                    event_moment = new_event_moment
-                                } else if (which_day) {
-                                    event_moment = new_event_moment.hour(old_event_moment.hour()).minute(old_event_moment.minute())
-                                } else if (what_time) {
-                                    event_moment = old_event_moment.hour(new_event_moment.hour()).minute(new_event_moment.minute())
-                                }
-                                let expire_math = event_moment.clone().add(1, 'd').hour(0).minute(0)
-                                event.expire = expire_math.format('MMMM Do, h:mm a')
-                                let expire_time = expire_math.diff(moment())
-                                collector.options.time = expire_time
-                                event.date = event_moment.format('MMMM Do, h:mm a')
-                            }
+        //                     let event_edit = single(inputs)
+        //                     if (event_edit != -1) {
+        //                         let old_event_moment = event_moment.clone()
+        //                         let new_event_moment = event_edit.time
+        //                         let which_day = event_edit.which_day
+        //                         let what_time = event_edit.what_time
+        //                         if (!new_event_moment) {
+        //                             // TODO: edit error here 
+        //                             return
+        //                         }
+        //                         if (which_day && what_time) {
+        //                             event_moment = new_event_moment
+        //                         } else if (which_day) {
+        //                             event_moment = new_event_moment.hour(old_event_moment.hour()).minute(old_event_moment.minute())
+        //                         } else if (what_time) {
+        //                             event_moment = old_event_moment.hour(new_event_moment.hour()).minute(new_event_moment.minute())
+        //                         }
+        //                         let expire_math = event_moment.clone().add(1, 'd').hour(0).minute(0)
+        //                         event.expire = expire_math.format('MMMM Do, h:mm a')
+        //                         let expire_time = expire_math.diff(moment())
+        //                         collector.options.time = expire_time
+        //                         event.date = event_moment.format('MMMM Do, h:mm a')
+        //                     }
 
-                            editMsg.edit(_makeEditEmbed(message, msg, event, true))
-                            let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
-                            for ( let r of userReacts) {
-                                if (r[0] == "📝") r[1].users.remove(user.id)
-                            }
-                            m.delete()
-                            editCollector.stop()
-                        }
-                    })
-                    editCollector.on('end', () => {
-                        let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
-                        for ( let r of userReacts) {
-                            if (r[0] == "📝") r[1].users.remove(user.id)
-                        }
-                    })
+        //                     editMsg.edit(makeEditEmbed(message, msg, event, true))
+        //                     let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
+        //                     for ( let r of userReacts) {
+        //                         if (r[0] == "📝") r[1].users.remove(user.id)
+        //                     }
+        //                     m.delete()
+        //                     editCollector.stop()
+        //                 }
+        //             })
+        //             editCollector.on('end', () => {
+        //                 let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
+        //                 for ( let r of userReacts) {
+        //                     if (r[0] == "📝") r[1].users.remove(user.id)
+        //                 }
+        //             })
                     
-                } else {
-                    let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
-                    for ( let r of userReacts) {
-                        if (r[0] == "📝") r[1].users.remove(user.id)
-                    }
-                }
-            } else if (reaction.emoji.name == "🗑️") {
-                if (message.author.id === user.id) {
-                    collector.stop()
-                    return
-                } else {
-                    let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
-                    for ( let r of userReacts) {
-                        if (r[0] == "🗑️") r[1].users.remove(user.id)
-                    }
-                }
-            }
-            msg.edit(_makeEmbed(message, event))
-        })
+        //         } else {
+        //             let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
+        //             for ( let r of userReacts) {
+        //                 if (r[0] == "📝") r[1].users.remove(user.id)
+        //             }
+        //         }
+        //     } else if (reaction.emoji.name == "🗑️") {
+        //         if (message.author.id === user.id) {
+        //             collector.stop()
+        //             return
+        //         } else {
+        //             let userReacts = msg.reactions.cache.filter(r => r.users.cache.has(user.id))
+        //             for ( let r of userReacts) {
+        //                 if (r[0] == "🗑️") r[1].users.remove(user.id)
+        //             }
+        //         }
+        //     }
+        //     msg.edit(makeEmbed(message, event))
+        // })
         
-        collector.on('remove', (reaction, user) => {
-            if (reaction.emoji.name == "✅") {
-                let idx = event.attendees.indexOf(user.id)
-                if (idx != -1) event.attendees.splice(idx)
-            } else if (reaction.emoji.name == "❌") {
-                let idx = event.declined.indexOf(user.id)
-                if (idx != -1) event.declined.splice(idx)
-            }
-            msg.edit(_makeEmbed(message, event))
-        })
+        // collector.on('remove', (reaction, user) => {
+        //     if (reaction.emoji.name == "✅") {
+        //         let idx = event.attendees.indexOf(user.id)
+        //         if (idx != -1) event.attendees.splice(idx)
+        //     } else if (reaction.emoji.name == "❌") {
+        //         let idx = event.declined.indexOf(user.id)
+        //         if (idx != -1) event.declined.splice(idx)
+        //     }
+        //     msg.edit(makeEmbed(message, event))
+        // })
 
-        collector.on('end', collected => {
-            shortMsg.edit(_makeShortEmbed(msg, event, channel, true))
-            msg.delete()
-        })
+        // collector.on('end', collected => {
+        //     shortMsg.edit(makeShortEmbed(msg, event, channel, true))
+        //     msg.delete()
+        // })
     }
 }
 
-function _makeEmbed (message, event) {
+export function makeEmbed (message, event) {
     const embed = new Discord.MessageEmbed()
         .setColor("#7851a9")
         .setTitle(event.name)
@@ -231,7 +243,7 @@ function _makeEmbed (message, event) {
     return embed
 }
 
-function _makeShortEmbed (message, event, channel, expired) {
+export function makeShortEmbed (message, event, channel, expired) {
     let exp = ""
     if (expired) exp = "(expired)"
     const embed = new Discord.MessageEmbed()
@@ -240,7 +252,7 @@ function _makeShortEmbed (message, event, channel, expired) {
     return embed
 }
 
-function _makeEditEmbed (message, bot_message, event, edited) {
+export function makeEditEmbed (message, bot_message, event, edited) {
     let val
     if (edited) {
         val = `<@!${message.author.id}> edited Event [${event.name}](${bot_message.url}) in the calendar`

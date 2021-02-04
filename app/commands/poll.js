@@ -81,7 +81,7 @@ export default {
         let filter = (reaction, user) => {
             return user.id !== msg.author.id  && pollEmojis.includes(reaction.emoji.name)
         }
-        let collector = msg.createReactionCollector(filter, { dispose: true, time: expire*86400000 })
+        // let collector = msg.createReactionCollector(filter, { dispose: true, time: expire*86400000 })
         // collector.on('collect', (reaction, user) => {
         //     console.log(`Collected ${reaction.emoji.name} from ${user.tag}`)
         //     if (reaction.emoji.name == "📅") {
@@ -119,10 +119,10 @@ export default {
         //     msg.edit(makeEmbed(message, poll))
         // })
 
-        collector.on('end', collected => {
-            // msg.reactions.removeAll().catch(error => console.error('Failed to clear reactions: ', error));
-            msg.delete()
-        })
+        // collector.on('end', collected => {
+        //     // msg.reactions.removeAll().catch(error => console.error('Failed to clear reactions: ', error));
+        //     msg.delete()
+        // })
     }
 }
 

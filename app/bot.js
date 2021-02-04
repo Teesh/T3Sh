@@ -11,7 +11,10 @@ import Ask from './commands/ask.js'
 import Event from './commands/event.js'
 
 import { addReply as addPollReply, removeReply as removePollReply } from '../db/poll.js'
+import { addReply as addEventReply, removeReply as removeEventReply } from '../db/event.js'
 import { makeEmbed as pollEmbed } from './commands/poll.js'
+import { makeEmbed as eventEmbed } from './commands/event.js'
+import { userDeleteEmbed } from '../db/general.js' 
 import { pollEmojis, eventEmojis, deleteEmoji } from '../utilities/helpers.js'
 import event from './commands/event.js'
 
@@ -53,12 +56,16 @@ bot.on('messageReactionAdd', async (reaction, user) => {
 		}
     }
     if (user.id === reaction.message.author.id) return // ignore bot replies
-    if (eventEmojis.includes(reaction.emoji.name)) addEventReply(reaction, user)
-    else if (pollEmojis.includes(reaction.emoji.name)) {
+    if (eventEmojis.includes(reaction.emoji.name)) {
+        let updatedEvent = await addEventReply(reaction, user)
+        reaction.message.edit(eventEmbed(updatedEvent.message, updatedEvent))
+    } else if (pollEmojis.includes(reaction.emoji.name)) {
         let updatedPoll = await addPollReply(reaction, user)
         reaction.message.edit(pollEmbed(updatedPoll.message, updatedPoll))
     }
-    else if (reaction.emoji.name == deleteEmoji) deleteMessage(reaction, user)
+    else if (reaction.emoji.name == deleteEmoji) {
+        userDeleteEmbed(reaction, user)
+    }
 })
 
 bot.on('messageReactionRemove', async (reaction, user) => {
@@ -71,15 +78,19 @@ bot.on('messageReactionRemove', async (reaction, user) => {
 		}
     }
     if (user.id === reaction.message.author.id) return // ignore bot replies
-    if (eventEmojis.includes(reaction.emoji.name)) removeEventReply(reaction, user)
-    else if (pollEmojis.includes(reaction.emoji.name)) {
+    if (eventEmojis.includes(reaction.emoji.name)) {
+        let updatedEvent = await removeEventReply(reaction, user)
+        reaction.message.edit(eventEmbed(updatedEvent.message, updatedEvent))
+    } else if (pollEmojis.includes(reaction.emoji.name)) {
         let updatedPoll = await removePollReply(reaction, user)
         reaction.message.edit(pollEmbed(updatedPoll.message, updatedPoll))
     }
 })
 
+// Login after all listeners set up
 bot.login(process.env.DISCORD_BOT_TOKEN)
 
+// redirect Windows Ctrl-C to graceful shutdown
 if (process.platform === "win32") {
     let rl = Readline.createInterface({
         input: process.stdin,
@@ -91,6 +102,7 @@ if (process.platform === "win32") {
     })
 }
 
+// Clean up stray messages and close DB before graceful shutdown
 process.on("SIGINT", async function () {
     try {
         let channel = bot.channels.cache.find(c => c.name.toLowerCase() === settings.default_calendar_channel)
