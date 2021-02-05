@@ -46,7 +46,6 @@ bot.on('message', message => {
 })
 
 bot.on('messageReactionAdd', async (reaction, user) => {
-    console.log(user)
     if (reaction.partial) {
 		// If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
 		try {
@@ -73,7 +72,6 @@ bot.on('messageReactionAdd', async (reaction, user) => {
 })
 
 bot.on('messageReactionRemove', async (reaction, user) => {
-    console.log(user)
     if (reaction.partial) {
 		try {
 			await reaction.fetch()

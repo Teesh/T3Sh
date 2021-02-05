@@ -17,7 +17,11 @@ export default {
 	async execute(original_message) {
         let message = original_message
         original_message.delete()
-        let args = message.content.substr(message.content.indexOf(' ') + 1).replace(/ +(?= )/g,'')
+        let content = message.content
+        let mentions = content.match(/<@[!#&]?[0-9]+>/g, '') || []
+        console.log(mentions)
+        content = content.replace(/<@[!#&]?[0-9]+>/g, '').trim()
+        let args = content.substr(content.indexOf(' ') + 1).replace(/ +(?= )/g,'')
         let event_name
         let inputs
         try {
@@ -66,7 +70,7 @@ export default {
         let shortMsg
         let channel = message.guild.channels.cache.find(c => c.name.toLowerCase() === settings.default_calendar_channel)
         try {
-            msg = await channel.send(embed)
+            msg = await channel.send(mentions.join(' '), embed)
             shortMsg = await message.channel.send(makeShortEmbed(msg, event, channel))
         } catch  (e) {
             console.error(e)

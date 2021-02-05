@@ -16,7 +16,10 @@ export default {
 	async execute(original_message) {
         let message = original_message
         original_message.delete()
-        let args = message.content.substr(message.content.indexOf(' ') + 1)
+        let content = message.content
+        let mentions = content.match(/<@[!#&]?[0-9]+>/g, '') || []
+        content = content.replace(/<@[!#&]?[0-9]+>/g, '').trim()
+        let args = content.substr(content.indexOf(' ') + 1)
                     .replace(/ +(?= )/g,'') // remove multiple consecutive spaces
                     .replace(/["']/g, "") // replace quotes with brackets
         let poll_name
@@ -65,7 +68,7 @@ export default {
         let msg
         let channel = message.guild.channels.cache.find(c => c.name.toLowerCase() === settings.default_calendar_channel)
         try {
-            msg = await channel.send(embed)
+            msg = await channel.send(mentions.join(' '), embed)
             await message.channel.send(makeShortEmbed(msg, poll, channel))
         } catch  (e) {
             console.error(e)
@@ -89,7 +92,7 @@ export function makeEmbed (message, poll) {
         )
     embed.addFields({
         name: `:question: ${poll.name}`,
-        value: `asked by <@!${message.author.id}> in <#${message.channel.id}>`
+        value: `posted by <@!${message.author.id}> in <#${message.channel.id}>`
     })
     let total = Object.keys(poll.reactions).map(key => poll.reactions[key].length).reduce((p, c) => p + c, 0)
     for (let opt in poll.options) {
