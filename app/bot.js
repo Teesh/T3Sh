@@ -37,7 +37,7 @@ bot.on('message', message => {
             else if (Poll.alias.includes(cmd)) Poll.execute(message)
             else if (Ask.alias.includes(cmd)) Ask.execute(message)
             else if (Event.alias.includes(cmd)) Event.execute(message)
-            else message.reply("I don't know that command!")
+            else message.reply("I don't know that command!").then(m => m.delete({timeout: 5000}))
         } catch (error) {
             console.error(error)
             message.reply("Something went wrong")
