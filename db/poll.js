@@ -46,7 +46,6 @@ export async function removeReply(reaction, user) {
     } catch (e) {
         console.error(e)
     } finally {
-        console.log(output)
         return(output.value)
     }
 }

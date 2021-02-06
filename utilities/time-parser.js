@@ -2,6 +2,7 @@ import moment from 'moment'
 import { settings } from '../config.js'
 
 // TODO: stricter error checking with cleaner exceptions
+// TODO: fix military time parsing
 export function single (input) {
     input = input.toLowerCase()
     let which_day = input.match(days)
@@ -9,6 +10,7 @@ export function single (input) {
     let what_date = input.match(dates)
     input = input.replace(dates,'')
     let what_time = input.match(times)
+    console.log(which_day, what_date, what_time)
     let day = moment()
     let time
     if (!(which_day || what_date) && !what_time) return -1
@@ -105,18 +107,16 @@ export function single (input) {
             time = day.add(val, "hour").minute(minute)
         } else {
             let idx = 0
-            if (time_phrases[idx].includes("at")) idx = 1
+            if (time_phrases[idx].includes("at")) time_phrases.shift()
             let hour = 0, minute
 
+            console.log(time_phrases)
             if (time_phrases[idx+1]) {
                 if (time_phrases[idx+1].indexOf("p") != -1) hour += 12
             } else {
-                if (time_phrases[idx].indexOf("p") != -1) hour += 12
-                else {
-                    if (!time_phrases[idx].includes("a") && settings.default_meridiem == "PM") hour += 12
-                }
-                time_phrases[idx].replace(/\b[ap][m]?\b/, "")
+                if (settings.default_meridiem == "PM") hour += 12
             }
+            console.log(hour)
 
             if (time_phrases[idx].includes(':')) {
                 hour += parseInt(time_phrases[idx].split(":")[0])
@@ -133,6 +133,8 @@ export function single (input) {
                     minute = parseInt(time_phrases[idx].substring(2, 3))
                 }
             }
+            console.log(hour)
+            if (hour == 12 || hour == 24) hour -= 12
             time = day.hour(hour).minute(minute)
         }
     }

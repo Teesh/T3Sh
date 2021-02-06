@@ -1,5 +1,5 @@
 export const settings = {
-    "invoke": "+",
+    "invoke": "-",
     "default_event_time": "6:30",
     "default_time_zone": "Central",
     "default_meridiem": "PM",

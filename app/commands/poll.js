@@ -21,12 +21,11 @@ export default {
         content = content.replace(/<@[!#&]?[0-9]+>/g, '').trim()
         let args = content.substr(content.indexOf(' ') + 1)
                     .replace(/ +(?= )/g,'') // remove multiple consecutive spaces
-                    .replace(/["']/g, "") // replace quotes with brackets
         let poll_name
         let inputs
         try {
             poll_name = args.split('[')[1].split(']')[0].trim()
-            inputs = args.replace(" *\[[^]]*\] *", "")
+            inputs = args.replace(/ *\[[^\]]*\] */g, "")
         } catch {
             poll_name = "Poll"
             inputs = args.trim()
@@ -36,14 +35,14 @@ export default {
         let expire
         if (inputs.indexOf(',') == -1) {
             let option_set = range(inputs)
-            expire = option_set[option_set.length-1].diff(moment(), 'days') + 1
+            expire = option_set[option_set.length-1].clone().add(1, 'd').hour(0).minute(0).format('MMMM Do, h:mm a')
             options = option_set.map(opt => opt.format('ddd Do'))
         } else {
             let option_set = []
             let opts = inputs.split(',').map(s => s.trim().replace(/ +(?= )/g,''))
-            for (opt of opts) option_set.push(single(opt).time)
+            for (let opt of opts) option_set.push(single(opt).time)
             options = option_set.map(opt => opt.format('ddd Do'))
-            expire = option_set[option_set.length-1].diff(moment(), 'days') + 1
+            expire = option_set[option_set.length-1].clone().add(1, 'd').hour(0).minute(0).format('MMMM Do, h:mm a')
         }
         console.log('Poll options: ', options)
         let poll = {
@@ -88,7 +87,7 @@ export function makeEmbed (message, poll) {
     const embed = new Discord.MessageEmbed()
         .setColor("#7851a9")
         .setFooter(
-            `Started ${moment(message.createdAt).format('MMM Do, h:mm:ss a')} | Expires ${moment(message.createdAt).add(poll.expire, 'd').format('MMM Do, h:mm a')}`
+            `Started ${moment(message.createdAt).format('MMM Do, h:mm:ss a')} | Expires ${poll.expire}`
         )
     embed.addFields({
         name: `:question: ${poll.name}`,

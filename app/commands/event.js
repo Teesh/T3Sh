@@ -24,7 +24,7 @@ export default {
         let inputs
         try {
             event_name = args.split('[')[1].split(']')[0].trim()
-            inputs = args.replace(" *\[[^]]*\] *", "")
+            inputs = args.replace(/ *\[[^\]]*\] */g, "")
         } catch {
             event_name = "Event"
             inputs = args.trim()

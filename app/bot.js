@@ -25,11 +25,13 @@ await mongo.connect()
 
 bot.once('ready', () => {
     console.log('T3Sh ready')
+    bot.user.setActivity('game bois | -help', { type: 'WATCHING' })
 })
 
 bot.on('message', message => {
     let invoke = settings.invoke
     if (message.content.substring(0, 1) == invoke) {
+        console.log(`received command: ${message.content}`)
         let cmd = message.content.substr(1, message.content.indexOf(' ') - 1).toLowerCase() || message.content.substr(1).toLowerCase()
         try {
             if (Ping.alias.includes(cmd)) Ping.execute(message)
@@ -71,6 +73,7 @@ bot.on('messageReactionAdd', async (reaction, user) => {
         console.log(`Collected ${reaction.emoji.name} from ${user.tag || user.id}`)
         editEvent(reaction, user)
     }
+    // TODO: handle poll edits
 })
 
 bot.on('messageReactionRemove', async (reaction, user) => {

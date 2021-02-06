@@ -24,12 +24,11 @@ export default {
         content = content.replace(/<@[!#&]?[0-9]+>/g, '').trim()
         let args = content.substr(content.indexOf(' ') + 1)
                     .replace(/ +(?= )/g,'') // remove multiple consecutive spaces
-                    .replace(/["']/g, "") // replace quotes with brackets
         let question_name
         let inputs
         try {
             question_name = args.split('[')[1].split(']')[0].trim()
-            inputs = args.replace(" *\[[^]]*\] *", "")
+            inputs = args.replace(/ *\[[^\]]*\] */g, "")
         } catch {
             question_name = "Question"
             inputs = args.trim()
