@@ -1,8 +1,10 @@
 import Discord from 'discord.js'
 import Readline from 'readline'
+import schedule from 'node-schedule'
 
 import { settings } from '../config.js'
 import mongo from '../db/connect.js'
+import cleaner from './cleaner.js'
 
 import Ping from './commands/ping.js'
 import Help from './commands/help.js'
@@ -37,6 +39,7 @@ bot.on('message', message => {
             else if (Poll.alias.includes(cmd)) Poll.execute(message)
             else if (Ask.alias.includes(cmd)) Ask.execute(message)
             else if (Event.alias.includes(cmd)) Event.execute(message)
+            else if (cmd === "clean" && process.env.NODE_ENV === "development") cleaner(bot)
             else message.reply("I don't know that command!").then(m => m.delete({timeout: 5000}))
         } catch (error) {
             console.error(error)
@@ -56,17 +59,19 @@ bot.on('messageReactionAdd', async (reaction, user) => {
 		}
     }
     if (user.id === reaction.message.author.id) return // ignore bot replies
-    console.log(`Collected add ${reaction.emoji.name} from ${user.tag || user.id}`)
     if (eventEmojis.includes(reaction.emoji.name)) {
+        console.log(`Collected add event reply ${reaction.emoji.name} from ${user.tag || user.id}`)
         let updatedEvent = await addEventReply(reaction, user)
         reaction.message.edit(eventEmbed(updatedEvent.message, updatedEvent))
     } else if (pollEmojis.includes(reaction.emoji.name)) {
+        console.log(`Collected add poll reply ${reaction.emoji.name} from ${user.tag || user.id}`)
         let updatedPoll = await addPollReply(reaction, user)
         reaction.message.edit(pollEmbed(updatedPoll.message, updatedPoll))
-    }
-    else if (reaction.emoji.name == deleteEmoji) {
+    } else if (reaction.emoji.name == deleteEmoji) {
+        console.log(`Collected ${reaction.emoji.name} from ${user.tag || user.id}`)
         userDeleteEmbed(reaction, user)
     } else if (reaction.emoji.name == editEmoji) {
+        console.log(`Collected ${reaction.emoji.name} from ${user.tag || user.id}`)
         editEvent(reaction, user)
     }
 })
@@ -83,12 +88,18 @@ bot.on('messageReactionRemove', async (reaction, user) => {
     if (user.id === reaction.message.author.id) return // ignore bot replies
     console.log(`Collected remove ${reaction.emoji.name} from ${user.tag || user.id}`)
     if (eventEmojis.includes(reaction.emoji.name)) {
+        console.log(`Collected remove event reply ${reaction.emoji.name} from ${user.tag || user.id}`)
         let updatedEvent = await removeEventReply(reaction, user)
         reaction.message.edit(eventEmbed(updatedEvent.message, updatedEvent))
     } else if (pollEmojis.includes(reaction.emoji.name)) {
+        console.log(`Collected remove poll reply ${reaction.emoji.name} from ${user.tag || user.id}`)
         let updatedPoll = await removePollReply(reaction, user)
         reaction.message.edit(pollEmbed(updatedPoll.message, updatedPoll))
     }
+})
+
+schedule.scheduleJob('1 0 * * *', () => { 
+    cleaner(bot)
 })
 
 // Login after all listeners set up
