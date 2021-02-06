@@ -9,7 +9,6 @@ import { eventEmojis } from '../../utilities/helpers.js'
 
 // TODO: Add voice channel link to event
 // TODO: Add game recognition to event
-// TODO: Handle users/roles being @'d as request to attend
 export default {
 	name: 'event',
     description: 'Create an event on a date with a guest list',
@@ -19,7 +18,6 @@ export default {
         original_message.delete()
         let content = message.content
         let mentions = content.match(/<@[!#&]?[0-9]+>/g, '') || []
-        console.log(mentions)
         content = content.replace(/<@[!#&]?[0-9]+>/g, '').trim()
         let args = content.substr(content.indexOf(' ') + 1).replace(/ +(?= )/g,'')
         let event_name

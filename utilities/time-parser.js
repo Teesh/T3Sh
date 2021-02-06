@@ -1,21 +1,23 @@
 import moment from 'moment'
 import { settings } from '../config.js'
 
-// TODO: Handle date inputs
+// TODO: stricter error checking with cleaner exceptions
 export function single (input) {
     input = input.toLowerCase()
     let which_day = input.match(days)
+    input = input.replace(days,'')
+    let what_date = input.match(dates)
+    input = input.replace(dates,'')
     let what_time = input.match(times)
     let day = moment()
     let time
-    if (!which_day && !what_time) return -1
+    if (!(which_day || what_date) && !what_time) return -1
     if (which_day) {
         which_day.sort((a, b) => b.length - a.length)
         let day_phrases = which_day[0].split(" ")
         let idx = 0
         let now = moment()
         let today = now.day()
-        let day_offset = 0
         if (day_phrases[idx] == "today") {
             day = now
         } else if (day_phrases[idx] == "tomorrow") {
@@ -56,10 +58,30 @@ export function single (input) {
             if (today > 5) now.add(1, "week")
             day = now.day("Saturday")
         }
+    } else if (what_date) {
+        let date_phrases = what_date[0].split(" ")
+        let idx = 0
+        let now = moment()
+
+        if (date_phrases[0] === "on") date_phrases.shift() // remove first "on" element
+        let month, date
+        
+        if (date_phrases[0].match(/[-\/]/)) {
+            let date_nums = date_phrases[0].split(/[-\/]/)
+            month = parseInt(date_nums[0])-1
+            date = parseInt(date_nums[1])
+        } else {
+            month = date_phrases[0]
+            date = parseInt(date_phrases[1].replace(/[(st|rd|th),]/, ''))
+        }
+        if (month < now.month()) now.add(1, "year")
+        day = now.month(month).date(date)
     }
 
     if (what_time) {
         what_time.sort((a, b) => b.length - a.length)
+        if (what_time[0].indexOf(" p") === -1) what_time[0] = what_time[0].replace('p', ' p')
+        if (what_time[0].indexOf(" a") === -1) what_time[0] = what_time[0].replace('a', ' a')
         let time_phrases = what_time[0].split(" ")
         if (["hour", "hours"].some(r => time_phrases.includes(r))) {
             let idx = 0
@@ -122,15 +144,15 @@ export function single (input) {
         if (settings.default_meridiem == "PM") default_hour += 12
         time = day.hour(default_hour).minute(default_minute)
     }
+
     return {
         time: time,
-        which_day: which_day,
-        what_time: what_time
+        which_day: (which_day || what_date) ? true : false,
+        what_time: what_time ? true : false,
     }
 }
 
 // TODO: Handle numerical input week(end)s
-// TODO: Handle CSV inputs
 export function range (input) {
     input = input.toLowerCase()
     let what_days = input.match(ranges)
@@ -202,6 +224,7 @@ export function range (input) {
 }
 
 const days = /\b(((on|this|next) )?((to|mon|tue(s)?|wed(nes)?|thu(r)?(s)?|fri|sat(ur)?|sun))(day|morrow)?)|(in )?(a|[0-9]{1,2}) (day(s)?)\b/g
+const dates = /\b(on )?(((Jan(uary)?|Feb(ruary)?|Mar(ch)?|Apr(il)?|May|Jun(e)?|Jul(y)?|Aug(ust)?|Sep(t(ember)?)?|Oct(ober)?|Nov(ember)?|Dec(ember)?) [0-9]{1,2}(st|rd|th)?((,)? [0-9]{2,4})?)|([0-9]{1,2}[\/-][0-9]{1,2}([\/-][0-9]{2,4})?))\b/gi
 const times = /\b((at )?[0-1]?[0-9]|2[0-3]):?([0-5][0-9])?(( )?[ap][m]?)?|(in )?([0-9]{1,2}|(a(n)?)) ((hour)(s)?)\b/g
 
 const ranges = /\b((for )?(a|all|this|next) )?(([1-9]) )?((day|week(end)?(day)?)(s)?)\b/g

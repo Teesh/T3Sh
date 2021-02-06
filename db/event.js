@@ -83,6 +83,7 @@ export async function removeReply(reaction, user) {
     }
 }
 
+// TODO: add +/- [0-9] day/hour handler
 export async function editEvent(reaction, user) {
     let db = await mongo.db()
 

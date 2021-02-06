@@ -21,7 +21,7 @@ export async function deleteEmbed(message, collection) {
     let db = await mongo.db()
 
     try {
-        await db.collection(collection, { _id: message.id })
+        await db.collection(collection).deleteOne({ _id: message.id })
     } catch (e) {
         console.error(e)
     } finally {
