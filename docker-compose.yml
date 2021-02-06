@@ -14,4 +14,8 @@ services:
     build: .
     container_name: tesh_bot
     environment:
-      - DB_HOST=db:27017
+      - MONGO_INITDB_ROOT_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD
+      - NODE_ENV
+      - DB_HOST
+      - DISCORD_BOT_TOKEN

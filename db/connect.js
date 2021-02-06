@@ -3,7 +3,7 @@ import MongoClient from "mongodb"
 var _db = null
 let _username = encodeURIComponent(process.env.MONGO_INITDB_ROOT_USERNAME)
 let _password = encodeURIComponent(process.env.MONGO_INITDB_ROOT_PASSWORD)
-let _server = process.env.NODE_ENV == "production" ? "db" : "127.0.0.1"
+let _server = process.env.DB_HOST
 let _uri = `mongodb://${_username}:${_password}@${_server}/
         ?authMechanism=DEFAULT
         &poolSize=20

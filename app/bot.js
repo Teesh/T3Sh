@@ -28,9 +28,7 @@ bot.once('ready', () => {
 })
 
 bot.on('message', message => {
-    let invoke
-    if (process.env.NODE_ENV == "production") invoke = settings.invoke
-    else if (process.env.NODE_ENV == "development") invoke = "-"
+    let invoke = settings.invoke
     if (message.content.substring(0, 1) == invoke) {
         let cmd = message.content.substr(1, message.content.indexOf(' ') - 1).toLowerCase() || message.content.substr(1).toLowerCase()
         try {
@@ -39,7 +37,6 @@ bot.on('message', message => {
             else if (Poll.alias.includes(cmd)) Poll.execute(message)
             else if (Ask.alias.includes(cmd)) Ask.execute(message)
             else if (Event.alias.includes(cmd)) Event.execute(message)
-            else if (cmd === "clean" && process.env.NODE_ENV === "development") cleaner(bot)
             else message.reply("I don't know that command!").then(m => m.delete({timeout: 5000}))
         } catch (error) {
             console.error(error)
