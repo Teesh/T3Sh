@@ -66,7 +66,7 @@ export default {
         let embed = makeEmbed(message, event)
         let msg
         let shortMsg
-        let channel = message.guild.channels.cache.find(c => c.name.toLowerCase() === settings.default_calendar_channel)
+        let channel = message.guild.channels.cache.find(c => c.name.toLowerCase().includes(settings.default_calendar_channel))
         try {
             msg = await channel.send(mentions.join(' '), embed)
             shortMsg = await message.channel.send(makeShortEmbed(msg, event, channel))

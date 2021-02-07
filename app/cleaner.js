@@ -6,7 +6,7 @@ import mongo from "../db/connect.js"
 
 export default async function (bot) {
     let db = await mongo.db()
-    let channel = bot.channels.cache.find(c => c.name.toLowerCase() === settings.default_calendar_channel)
+    let channel = bot.channels.cache.find(c => c.name.toLowerCase().includes(settings.default_calendar_channel))
 
     db.collection("events").find().forEach(async (event) => {
         if (moment().diff(moment(event.expire, 'MMMM Do, h:mm a')) > 0) {
