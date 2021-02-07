@@ -109,7 +109,6 @@ export function single (input) {
             if (time_phrases[idx].includes("at")) time_phrases.shift()
             let hour = 0, minute
 
-            console.log(time_phrases)
             if (time_phrases[idx+1]) {
                 if (time_phrases[idx+1].indexOf("p") != -1) hour += 12
             } else {
