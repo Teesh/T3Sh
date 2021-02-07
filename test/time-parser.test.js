@@ -7,7 +7,7 @@ let debug = 1
 if (process.argv[2] == "single" && process.argv[3]) {
     console.log(`Trying phrase: ${process.argv[3]}`)
     try {
-        let output = TimeParser.single(process.argv[3].format("dddd, MMMM Do YYYY, h:mm a"))
+        let output = TimeParser.single(process.argv[3].format("dddd, MMM Do YYYY, h:mm a"))
         console.log(`✔️  ${output}\n`)
     } catch (e) {
         console.log(`❌ ${e}\n`)
@@ -45,7 +45,7 @@ if (process.argv[2] == "single" && process.argv[3]) {
         for (let phrase of single_phrases) {
             console.log(`Trying phrase: ${phrase}`)
             try {
-                let output = TimeParser.single(phrase).format("dddd, MMMM Do YYYY, h:mm a")
+                let output = TimeParser.single(phrase).format("dddd, MMM Do YYYY, h:mm a")
                 console.log(`✔️  ${output}\n`)
             } catch (e) {
                 console.log(`❌ ${e}\n`)

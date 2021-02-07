@@ -9,7 +9,7 @@ export default async function (bot) {
     let channel = bot.channels.cache.find(c => c.name.toLowerCase().includes(settings.default_calendar_channel))
 
     db.collection("events").find().forEach(async (event) => {
-        if (moment().diff(moment(event.expire, 'MMMM Do, h:mm a')) > 0) {
+        if (moment().diff(moment(event.expire, 'dddd MMM Do, h:mm a')) > 0) {
             let message
             console.log(`cleaning event: ${event._id}`)
             try {
@@ -24,7 +24,7 @@ export default async function (bot) {
     })
 
     db.collection("polls").find().forEach(async (poll) => {
-        if (moment().diff(moment(poll.expire, 'MMMM Do, h:mm a')) > 0) {
+        if (moment().diff(moment(poll.expire, 'dddd MMM Do, h:mm a')) > 0) {
             let message
             console.log(`cleaning poll: ${poll._id}`)
             try {

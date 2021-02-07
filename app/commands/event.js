@@ -40,9 +40,9 @@ export default {
             message.channel.send("Failed to create event. Check the parameters")
             return
         }
-        let event_date = event_moment.format('MMMM Do, h:mm a')
+        let event_date = event_moment.format('dddd MMM Do, h:mm a')
         let expire_math = event_moment.clone().add(1, 'd').hour(0).minute(0)
-        let expire = expire_math.format('MMMM Do, h:mm a')
+        let expire = expire_math.format('dddd MMM Do, h:mm a')
         let expire_time = expire_math.diff(moment())
         
         let event = {

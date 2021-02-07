@@ -35,14 +35,14 @@ export default {
         let expire
         if (inputs.indexOf(',') == -1) {
             let option_set = range(inputs)
-            expire = option_set[option_set.length-1].clone().add(1, 'd').hour(0).minute(0).format('MMMM Do, h:mm a')
+            expire = option_set[option_set.length-1].clone().add(1, 'd').hour(0).minute(0).format('dddd MMM Do, h:mm a')
             options = option_set.map(opt => opt.format('ddd Do'))
         } else {
             let option_set = []
             let opts = inputs.split(',').map(s => s.trim().replace(/ +(?= )/g,''))
             for (let opt of opts) option_set.push(single(opt).time)
             options = option_set.map(opt => opt.format('ddd Do'))
-            expire = option_set[option_set.length-1].clone().add(1, 'd').hour(0).minute(0).format('MMMM Do, h:mm a')
+            expire = option_set[option_set.length-1].clone().add(1, 'd').hour(0).minute(0).format('dddd MMM Do, h:mm a')
         }
         console.log('Poll options: ', options)
         let poll = {

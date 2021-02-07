@@ -126,7 +126,7 @@ export async function editEvent(reaction, user) {
 
             let event_edit = single(inputs)
             if (event_edit != -1) {
-                let event_moment = moment(event.date, 'MMMM Do, h:mm a')
+                let event_moment = moment(event.date, 'dddd MMM Do, h:mm a')
                 let old_event_moment = event_moment.clone()
                 let new_event_moment = event_edit.time
                 let which_day = event_edit.which_day
@@ -143,8 +143,8 @@ export async function editEvent(reaction, user) {
                     event_moment = old_event_moment.hour(new_event_moment.hour()).minute(new_event_moment.minute())
                 }
                 let expire_math = event_moment.clone().add(1, 'd').hour(0).minute(0)
-                event.expire = expire_math.format('MMMM Do, h:mm a')
-                event.date = event_moment.format('MMMM Do, h:mm a')
+                event.expire = expire_math.format('dddd MMM Do, h:mm a')
+                event.date = event_moment.format('dddd MMM Do, h:mm a')
                 edit = true
             }
 
