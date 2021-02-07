@@ -24,7 +24,7 @@ function _makeDefaultHelpEmbed () {
     const embed = new Discord.MessageEmbed()
       .setColor("#7851a9")
       .setTitle("T3Sh Commands Help")
-      .setDescription("Type -? followed by the name of a command to get more details abou the command")
+      .setDescription("Type -? followed by the name of a command to get more details about the command")
     embed.addFields({
         name: "Help",
         value: `Show the help for T3Sh bot
