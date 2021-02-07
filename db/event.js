@@ -86,11 +86,17 @@ export async function removeReply(reaction, user) {
 // TODO: add +/- [0-9] day/hour handler
 export async function editEvent(reaction, user) {
     let db = await mongo.db()
+    let edit = false
 
     let event = await db.collection("events").findOne({ "_id" : reaction.message.id })
-    if (event.message.author.id !== user.id) return
+    let members = await reaction.message.guild.members.fetch()
+    let member = members.find(u => u.id === user.id)
+    if (event.message.author.id !== user.id && !member.roles.cache.find(r => r.name.includes("helpful bois"))) {
+        reaction.users.remove(user.id)
+        return
+    }
     let channel = reaction.message.guild.channels.cache.get(event.message.channel.id)
-    let editMsg = await channel.send(makeEditEmbed(event.message, reaction.message, event))
+    let editMsg = await channel.send(makeEditEmbed(event.message, reaction.message, event, user))
     let editCollector = new Discord.MessageCollector(channel, m => m.author.id === user.id, { time: 120000 })
     editCollector.on('collect', async (m) => {
         let cmd = m.content.substr(0, m.content.indexOf(' ')).toLowerCase()
@@ -101,16 +107,20 @@ export async function editEvent(reaction, user) {
             let inputs
             try {
                 event_name = args.split('[')[1].split(']')[0].trim()
-                inputs = args.replace(" *\[[^]]*\] *", "")
+                inputs = args.replace(/ *\[[^\]]*\] */, "")
             } catch {
                 inputs = args.trim()
             }
-            if (event_name) event.name = event_name
+            if (event_name) {
+                event.name = event_name
+                edit = true
+            }
             let max
             let max_phrase = inputs.match(/\bm(ax)?( )?=( )?[0-9]{1,3}\b/g)
             if (max_phrase) {
                 max = parseInt(max_phrase[0].split("=")[1].trim())
                 event.max = max
+                edit = true
             }
             inputs = inputs.replace(/\bm(ax)?( )?=( )?[0-9]{1,3}\b/g, "")
 
@@ -135,22 +145,23 @@ export async function editEvent(reaction, user) {
                 let expire_math = event_moment.clone().add(1, 'd').hour(0).minute(0)
                 event.expire = expire_math.format('MMMM Do, h:mm a')
                 event.date = event_moment.format('MMMM Do, h:mm a')
+                edit = true
             }
 
-            await db.collection("events").findOneAndReplace(
-                { _id: reaction.message.id },
-                event
-            )
-            editMsg.edit(makeEditEmbed(event.message, reaction.message, event, true))
+            if (edit) {
+                await db.collection("events").findOneAndReplace(
+                    { _id: reaction.message.id },
+                    event
+                )
+            }
             reaction.message.edit(makeEmbed(event.message, event))
             m.delete()
             editCollector.stop()
         }
     })
     editCollector.on('end', () => {
-        let userReacts = reaction.message.reactions.cache.filter(r => r.users.cache.has(user.id))
-        for ( let r of userReacts) {
-            if (r[0] == "📝") r[1].users.remove(user.id)
-        }
+        if (edit) editMsg.edit(makeEditEmbed(event.message, reaction.message, event, user, true))
+        else editMsg.delete()
+        reaction.users.remove(user.id)
     })
 }

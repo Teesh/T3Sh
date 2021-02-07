@@ -9,7 +9,6 @@ import { pollEmojis } from '../../utilities/helpers.js'
 
 import db from "../../db/connect.js"
 
-// TODO: Have a way to add optioned polls to the calendar channel
 // TODO: Handle users being @'d for request to answer
 // TODO: Add action to auto generate event from a poll option
 export default {

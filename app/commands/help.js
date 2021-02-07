@@ -28,31 +28,41 @@ function _makeDefaultHelpEmbed () {
     embed.addFields({
         name: "Help",
         value: `Show the help for T3Sh bot
+        There are three main commands in T3Sh: Poll, Event, and Question
         > -help
-        > -h Poll
-        > -? create`,
+        > -help Poll
+        > -h event
+        > -? question`,
     })
     embed.addFields({
         name: "Poll",
-        value: `Ask a question with some options or with a phrase for the days
-        > -poll [Poll name] opt1, opt 2, opt_3, ... , opt 9
-        > -p 3 days [Name]
-        > -question next 5 days
-        > -ask next week
+        value: `Post a poll with dates for options. 
+        All titles MUST be in brackets [Title]
+        > -poll [Poll name] mon, tue, wed, thu
+        > -p 3 days
         
         For more help, type
         > -? poll`
     })
     embed.addFields({
-        name: "Create Event",
+        name: "Event",
         value: `Create an event on a date with a guest list
+        All titles MUST be in brackets [Title]
         > -create [Event name] today at 5PM
-        > -c [Name] tomorrow at 6:30p
-        > -make [Game] in 5 hours
-        > -event on Tue at 7
+        > -c tomorrow at 6:30p
         
         For more help, type
         > -? event`
+    })
+    embed.addFields({
+        name: "Question",
+        value: `Ask a question in the channel
+        All titles MUST be in brackets [Title]
+        > -question [The question?] opt1, opt2, ..., opt9
+        > -q A, B, C, D
+        
+        For more help, type
+        > -? question`
     })
     return embed
 }

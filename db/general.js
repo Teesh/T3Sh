@@ -10,8 +10,11 @@ export async function userDeleteEmbed(reaction, user) {
         result = await db.collection("events").findOne({ "_id" : reaction.message.id })
     }
     if (!result) return
-    if (result.message.author.id !== user.id) {
-        reaction.remove()
+    console.log(reaction.message.guild.members)
+    let members = await reaction.message.guild.members.fetch()
+    let member = members.find(u => u.id === user.id)
+    if (result.message.author.id !== user.id && !member.roles.cache.find(r => r.name.includes("helpful bois"))) {
+        reaction.users.remove(user.id)
         return
     }
     deleteEmbed(reaction.message, collection)

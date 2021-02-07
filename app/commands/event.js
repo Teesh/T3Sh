@@ -128,12 +128,12 @@ export function makeShortEmbed (message, event, channel, expired) {
     return embed
 }
 
-export function makeEditEmbed (message, bot_message, event, edited) {
+export function makeEditEmbed (message, bot_message, event, user, edited) {
     let val
     if (edited) {
-        val = `<@!${message.author.id}> edited Event [${event.name}](${bot_message.url}) in the calendar`
+        val = `<@!${user.id}> edited Event [${event.name}](${bot_message.url}) in the calendar`
     } else {
-        val = `<@!${message.author.id}>, reply with the changes to Event [${event.name}](${bot_message.url}), starting with \`edit\``
+        val = `<@!${user.id}>, reply with the changes to Event [${event.name}](${bot_message.url}), starting with \`edit\``
     }
     const embed = new Discord.MessageEmbed()
       .setColor("#7851a9")

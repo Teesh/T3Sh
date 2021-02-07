@@ -10,7 +10,6 @@ export function single (input) {
     let what_date = input.match(dates)
     input = input.replace(dates,'')
     let what_time = input.match(times)
-    console.log(which_day, what_date, what_time)
     let day = moment()
     let time
     if (!(which_day || what_date) && !what_time) return -1
@@ -116,7 +115,6 @@ export function single (input) {
             } else {
                 if (settings.default_meridiem == "PM") hour += 12
             }
-            console.log(hour)
 
             if (time_phrases[idx].includes(':')) {
                 hour += parseInt(time_phrases[idx].split(":")[0])
@@ -133,7 +131,6 @@ export function single (input) {
                     minute = parseInt(time_phrases[idx].substring(2, 3))
                 }
             }
-            console.log(hour)
             if (hour == 12 || hour == 24) hour -= 12
             time = day.hour(hour).minute(minute)
         }

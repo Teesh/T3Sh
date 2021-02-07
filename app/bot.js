@@ -20,7 +20,13 @@ import { userDeleteEmbed } from '../db/general.js'
 import { pollEmojis, eventEmojis, deleteEmoji, editEmoji } from '../utilities/helpers.js'
 import event from './commands/event.js'
 
-let bot = new Discord.Client({ partials: ['USER', 'MESSAGE', 'CHANNEL', 'REACTION'] })
+let bot = new Discord.Client(
+    { 
+        partials: ['USER', 'MESSAGE', 'CHANNEL', 'REACTION'],
+        ws: { 
+            intents: ['GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILDS', 'GUILD_MESSAGE_REACTIONS']
+        }, 
+    })
 await mongo.connect()
 
 bot.once('ready', () => {
@@ -31,6 +37,7 @@ bot.once('ready', () => {
 // TODO: clean exit failed executes 
 bot.on('message', message => {
     let invoke = settings.invoke
+    if (process.env.NODE_ENV === "development") invoke = ">"
     if (message.content.substring(0, 1) == invoke) {
         console.log(`received command: ${message.content}`)
         let cmd = message.content.substr(1, message.content.indexOf(' ') - 1).toLowerCase() || message.content.substr(1).toLowerCase()
@@ -59,6 +66,7 @@ bot.on('messageReactionAdd', async (reaction, user) => {
 		}
     }
     if (user.id === reaction.message.author.id) return // ignore bot replies
+    // if (reaction.message.author.me === false)
     if (eventEmojis.includes(reaction.emoji.name)) {
         console.log(`Collected add event reply ${reaction.emoji.name} from ${user.tag || user.id}`)
         let updatedEvent = await addEventReply(reaction, user)
