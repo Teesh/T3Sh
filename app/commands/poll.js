@@ -100,7 +100,6 @@ export function makeEmbed (message, poll) {
     // otherwise if poll, calculate the total number of unique responses
     else {
         let arr = Object.keys(poll.reactions).reduce((r, v) => r.concat(poll.reactions[v]), [])
-        console.log(arr)
         total = new Set(arr).size
     }
     for (let opt in poll.options) {
