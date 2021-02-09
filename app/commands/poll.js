@@ -7,8 +7,8 @@ import { addPoll } from '../../db/poll.js'
 
 import { numToWord, pollEmojis } from '../../utilities/helpers.js'
 
-// TODO: Handle users being @'d for request to answer
 // TODO: Add action to auto generate event from a poll option
+// TODO: Make poll parsers modular functions
 export default {
 	name: 'poll',
     description: 'Ask a question with some options or with a phrase for the days',
@@ -57,6 +57,7 @@ export default {
                 },
             },
             name: poll_name,
+            type: 'poll',
             options: options,
             reactions: {},
             expire: expire
@@ -93,7 +94,15 @@ export function makeEmbed (message, poll) {
         name: `:question: ${poll.name}`,
         value: `posted by <@!${message.author.id}> in <#${message.channel.id}>`
     })
-    let total = Object.keys(poll.reactions).map(key => poll.reactions[key].length).reduce((p, c) => p + c, 0)
+    let total
+    // if it's a question, calculate the total number of responses
+    if (poll.type === "ask") total = Object.keys(poll.reactions).map(key => poll.reactions[key].length).reduce((p, c) => p + c, 0)
+    // otherwise if poll, calculate the total number of unique responses
+    else {
+        let arr = Object.keys(poll.reactions).reduce((r, v) => r.concat(poll.reactions[v]), [])
+        console.log(arr)
+        total = new Set(arr).size
+    }
     for (let opt in poll.options) {
         // ██████             for reference, whatever the fuck this symbol is
         let count = (poll.reactions[opt].length/total)*50 || 0

@@ -9,6 +9,8 @@ import { eventEmojis } from '../../utilities/helpers.js'
 
 // TODO: Add voice channel link to event
 // TODO: Add game recognition to event
+// TODO: Make event parsers modular function
+// TODO: Add event start notification
 export default {
 	name: 'event',
     description: 'Create an event on a date with a guest list',

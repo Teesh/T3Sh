@@ -66,7 +66,7 @@ bot.on('messageReactionAdd', async (reaction, user) => {
 		}
     }
     if (user.id === reaction.message.author.id) return // ignore bot replies
-    // if (reaction.message.author.me === false)
+    if (reaction.message.author.id !== bot.user.id) return // ignore replies on non-bot messages
     if (eventEmojis.includes(reaction.emoji.name)) {
         console.log(`Collected add event reply ${reaction.emoji.name} from ${user.tag || user.id}`)
         let updatedEvent = await addEventReply(reaction, user)
@@ -95,6 +95,7 @@ bot.on('messageReactionRemove', async (reaction, user) => {
 		}
     }
     if (user.id === reaction.message.author.id) return // ignore bot replies
+    if (reaction.message.author.id !== bot.user.id) return // ignore replies on non-bot messages
     console.log(`Collected remove ${reaction.emoji.name} from ${user.tag || user.id}`)
     if (eventEmojis.includes(reaction.emoji.name)) {
         console.log(`Collected remove event reply ${reaction.emoji.name} from ${user.tag || user.id}`)

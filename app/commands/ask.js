@@ -54,6 +54,7 @@ export default {
                 },
             },
             name: question_name,
+            type: 'ask',
             options: options,
             reactions: {},
             expire: expire

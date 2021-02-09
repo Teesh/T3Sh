@@ -1,4 +1,4 @@
-# T3Sh Bot (Teesh's Trivial Timekeeping Shell)
+# T3Sh Bot (Teesh's Trivial Timetable Shell)
 
 ## T3Sh Commands Help
 Type -? followed by the name of a command to get more details about the command
