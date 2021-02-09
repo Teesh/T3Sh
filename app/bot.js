@@ -31,7 +31,9 @@ await mongo.connect()
 
 bot.once('ready', () => {
     console.log('T3Sh ready')
-    bot.user.setActivity('game bois | -help', { type: 'WATCHING' })
+    let invoke = settings.invoke
+    if (process.env.NODE_ENV === "development") invoke = ">"
+    bot.user.setActivity(`v${process.env.npm_package_version} | ${invoke}help`, { type: 'LISTENING' })
 })
 
 // TODO: clean exit failed executes 
