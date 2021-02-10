@@ -12,4 +12,4 @@ RUN npm install
 COPY . /usr/src/bot
 
 # Start bot
-CMD ["node", "-r", "dotenv/config", "app/bot.js"]
+CMD ["npm", "run", "dev"]
