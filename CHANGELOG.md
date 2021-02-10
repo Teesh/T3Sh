@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Fixed bar that is too long for mobile in polls
 - Fixed unicode chars not showing up in mobile polls
+- Fix cleaner to recognized manually deleted or undefined 
 
 ## [0.2.4] - 2021-02-09
 ### Added
