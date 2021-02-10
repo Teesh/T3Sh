@@ -1,6 +1,6 @@
 {
   "name": "t3sh-bot",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "test gaming scheduler bot",
   "main": "bot.js",
   "author": "Teesh",
