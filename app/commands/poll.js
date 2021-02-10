@@ -103,9 +103,9 @@ export function makeEmbed (message, poll) {
     }
     for (let opt in poll.options) {
         // ██████             for reference, whatever the fuck this symbol is
-        let count = (poll.reactions[opt].length/total)*45 || 0
+        let count = (poll.reactions[opt].length/total)*42 || 0
         // FIXME: fix bug where progress bar changes lengths when receiving answers
-        let value = '[:'+numToWord(parseInt(opt)+1)+':](http://google.com) `'+'█'.repeat(count)+' '.repeat(45-count)+'`\nUsers: '
+        let value = numToWord(parseInt(opt)+1)+' `'+'█'.repeat(count)+' '.repeat(42-count)+'`\nUsers: '
         for (let user in poll.reactions[opt]) {
             value += '<@!'+poll.reactions[opt][user]+'>, '
         }
