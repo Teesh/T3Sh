@@ -30,7 +30,7 @@ export default {
             poll_name = "Poll"
             inputs = args.trim()
         }
-        console.log(`Creating poll: ${poll_name}`)
+        console.log(moment().format(), `Creating poll: ${poll_name}`)
         let options = []
         let expire
         if (inputs.indexOf(',') == -1) {
@@ -44,7 +44,6 @@ export default {
             options = option_set.map(opt => opt.format('ddd Do'))
             expire = option_set[option_set.length-1].clone().add(1, 'd').hour(0).minute(0).format('dddd MMM Do, h:mm a')
         }
-        console.log('Poll options: ', options)
         let poll = {
             message: {
                 id: message.id,
@@ -104,9 +103,9 @@ export function makeEmbed (message, poll) {
     }
     for (let opt in poll.options) {
         // ██████             for reference, whatever the fuck this symbol is
-        let count = (poll.reactions[opt].length/total)*50 || 0
+        let count = (poll.reactions[opt].length/total)*45 || 0
         // FIXME: fix bug where progress bar changes lengths when receiving answers
-        let value = '[:'+numToWord(parseInt(opt)+1)+':](http://google.com) `'+'█'.repeat(count)+' '.repeat(50-count)+'`\nUsers: '
+        let value = '[:'+numToWord(parseInt(opt)+1)+':](http://google.com) `'+'█'.repeat(count)+' '.repeat(45-count)+'`\nUsers: '
         for (let user in poll.reactions[opt]) {
             value += '<@!'+poll.reactions[opt][user]+'>, '
         }

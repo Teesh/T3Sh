@@ -11,7 +11,7 @@ export default async function (bot) {
     db.collection("events").find().forEach(async (event) => {
         if (moment().diff(moment(event.expire, 'dddd MMM Do, h:mm a')) > 0) {
             let message
-            console.log(`cleaning event: ${event._id}`)
+            console.log(moment().format(), `cleaning event: ${event._id}`)
             try {
                 message = await channel.messages.cache.find(m => m.id === event._id)
             } catch (e) {
@@ -26,7 +26,7 @@ export default async function (bot) {
     db.collection("polls").find().forEach(async (poll) => {
         if (moment().diff(moment(poll.expire, 'dddd MMM Do, h:mm a')) > 0) {
             let message
-            console.log(`cleaning poll: ${poll._id}`)
+            console.log(moment().format(), `cleaning poll: ${poll._id}`)
             try {
                 message = await channel.messages.cache.find(m => m.id === poll._id)
             } catch (e) {

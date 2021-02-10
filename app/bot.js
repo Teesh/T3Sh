@@ -1,6 +1,7 @@
 import Discord from 'discord.js'
 import Readline from 'readline'
 import schedule from 'node-schedule'
+import moment from 'moment'
 
 import { settings } from '../config.js'
 import mongo from '../db/connect.js'
@@ -30,10 +31,11 @@ let bot = new Discord.Client(
 await mongo.connect()
 
 bot.once('ready', () => {
-    console.log('T3Sh ready')
+    console.log(moment().format(), 'T3Sh ready')
     let invoke = settings.invoke
     if (process.env.NODE_ENV === "development") invoke = ">"
-    bot.user.setActivity(`v${process.env.npm_package_version} | ${invoke}help`, { type: 'LISTENING' })
+    bot.user.setActivity(`v${process.env.npm_package_version} | ${invoke}help`, { type: 'PLAYING' })
+    cleaner(bot)
 })
 
 // TODO: clean exit failed executes 
@@ -41,7 +43,7 @@ bot.on('message', message => {
     let invoke = settings.invoke
     if (process.env.NODE_ENV === "development") invoke = ">"
     if (message.content.substring(0, 1) == invoke) {
-        console.log(`received command: ${message.content}`)
+        console.log(moment().format(), `received command: ${message.content}`)
         let cmd = message.content.substr(1, message.content.indexOf(' ') - 1).toLowerCase() || message.content.substr(1).toLowerCase()
         try {
             if (Ping.alias.includes(cmd)) Ping.execute(message)
@@ -70,18 +72,18 @@ bot.on('messageReactionAdd', async (reaction, user) => {
     if (user.id === reaction.message.author.id) return // ignore bot replies
     if (reaction.message.author.id !== bot.user.id) return // ignore replies on non-bot messages
     if (eventEmojis.includes(reaction.emoji.name)) {
-        console.log(`Collected add event reply ${reaction.emoji.name} from ${user.tag || user.id}`)
+        console.log(moment().format(), `Collected add event reply ${reaction.emoji.name} from ${user.tag || user.id}`)
         let updatedEvent = await addEventReply(reaction, user)
         reaction.message.edit(eventEmbed(updatedEvent.message, updatedEvent))
     } else if (pollEmojis.includes(reaction.emoji.name)) {
-        console.log(`Collected add poll reply ${reaction.emoji.name} from ${user.tag || user.id}`)
+        console.log(moment().format(), `Collected add poll reply ${reaction.emoji.name} from ${user.tag || user.id}`)
         let updatedPoll = await addPollReply(reaction, user)
         reaction.message.edit(pollEmbed(updatedPoll.message, updatedPoll))
     } else if (reaction.emoji.name == deleteEmoji) {
-        console.log(`Collected ${reaction.emoji.name} from ${user.tag || user.id}`)
+        console.log(moment().format(), `Collected ${reaction.emoji.name} from ${user.tag || user.id}`)
         userDeleteEmbed(reaction, user)
     } else if (reaction.emoji.name == editEmoji) {
-        console.log(`Collected ${reaction.emoji.name} from ${user.tag || user.id}`)
+        console.log(moment().format(), `Collected ${reaction.emoji.name} from ${user.tag || user.id}`)
         editEvent(reaction, user)
     }
     // TODO: handle poll edits
@@ -98,13 +100,13 @@ bot.on('messageReactionRemove', async (reaction, user) => {
     }
     if (user.id === reaction.message.author.id) return // ignore bot replies
     if (reaction.message.author.id !== bot.user.id) return // ignore replies on non-bot messages
-    console.log(`Collected remove ${reaction.emoji.name} from ${user.tag || user.id}`)
+    console.log(moment().format(), `Collected remove ${reaction.emoji.name} from ${user.tag || user.id}`)
     if (eventEmojis.includes(reaction.emoji.name)) {
-        console.log(`Collected remove event reply ${reaction.emoji.name} from ${user.tag || user.id}`)
+        console.log(moment().format(), `Collected remove event reply ${reaction.emoji.name} from ${user.tag || user.id}`)
         let updatedEvent = await removeEventReply(reaction, user)
         reaction.message.edit(eventEmbed(updatedEvent.message, updatedEvent))
     } else if (pollEmojis.includes(reaction.emoji.name)) {
-        console.log(`Collected remove poll reply ${reaction.emoji.name} from ${user.tag || user.id}`)
+        console.log(moment().format(), `Collected remove poll reply ${reaction.emoji.name} from ${user.tag || user.id}`)
         let updatedPoll = await removePollReply(reaction, user)
         reaction.message.edit(pollEmbed(updatedPoll.message, updatedPoll))
     }
@@ -136,7 +138,7 @@ process.on("SIGINT", async function () {
     } catch (e) {
         console.log(e)
     }
-    console.log("T3Sh shutting down")
+    console.log(moment().format(), "T3Sh shutting down")
     //graceful shutdown
     process.exit()
 })

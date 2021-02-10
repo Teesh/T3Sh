@@ -1,4 +1,5 @@
 import mongo from './connect.js'
+import moment from 'moment'
 import { pollEmojis } from '../utilities/helpers.js'
 
 export async function addPoll(id, poll) {
@@ -12,7 +13,7 @@ export async function addPoll(id, poll) {
     } catch (e) {
         console.error(e)
     } finally {
-        console.log(output.result)
+        console.log(moment().format(), output.result)
     }
 }
 

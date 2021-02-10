@@ -17,7 +17,7 @@ export async function addEvent(id, event) {
     } catch (e) {
         console.error(e)
     } finally {
-        console.log(output.result)
+        console.log(moment().format(), output.result)
     }
 }
 
@@ -101,7 +101,10 @@ export async function editEvent(reaction, user) {
     editCollector.on('collect', async (m) => {
         let cmd = m.content.substr(0, m.content.indexOf(' ')).toLowerCase()
         if (['e', 'edit'].includes(cmd)) {
-            let args = m.content.substr(m.content.indexOf(' ') + 1).replace(/ +(?= )/g,'')
+            let content = m.content
+            let mentions = content.match(/<@[!#&]?[0-9]+>/g, '') || []
+            content = content.replace(/<@[!#&]?[0-9]+>/g, '').trim()
+            let args = content.substr(content.indexOf(' ') + 1).replace(/ +(?= )/g,'')
             if (!args) return
             let event_name
             let inputs
@@ -154,7 +157,7 @@ export async function editEvent(reaction, user) {
                     event
                 )
             }
-            reaction.message.edit(makeEmbed(event.message, event))
+            reaction.message.edit(mentions, makeEmbed(event.message, event))
             m.delete()
             editCollector.stop()
         }

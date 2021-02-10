@@ -32,7 +32,7 @@ export default {
             question_name = "Question"
             inputs = args.trim()
         }
-        console.log(`Creating poll: ${question_name}`)
+        console.log(moment().format(), `Creating poll: ${question_name}`)
         let options = []
         let expire
         if (inputs.indexOf(',') == -1) {
@@ -41,7 +41,6 @@ export default {
             options = inputs.split(',').map(s => s.trim().replace(/ +(?= )/g,''))
         }
         expire = 7
-        console.log('Poll options: ', options)
         let question = {
             message: {
                 id: message.id,
