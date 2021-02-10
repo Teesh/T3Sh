@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [0.2.4] - 2021-02-09
+## [0.2.4] - 2021-02-10
 ### Added
 - Timestamps to all console log outputs
 - Add mentions in edits to events
@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Fixed bar that is too long for mobile in polls
+- Fixed unicode chars not showing up in mobile polls
 
 ## [0.2.4] - 2021-02-09
 ### Added
