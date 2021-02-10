@@ -71,7 +71,8 @@ function _makePollHelpEmbed () {
     const embed = new Discord.MessageEmbed()
       .setColor("#7851a9")
       .setTitle("T3Sh Poll Commands Help")
-      .setDescription("Poll for game scheduling with some options or with a phrase for the days")
+      .setDescription(`Poll for game scheduling with some options or with a phrase for the days. 
+        This poll will automatically post in the game-scheduling channel`)
     embed.addFields({
         name: "Call poll",
         value: `A poll can be called in one of 2 ways
@@ -130,7 +131,7 @@ function _makeQuestionHelpEmbed () {
       .setDescription("Ask a question with some options")
     embed.addFields({
         name: "Ask question",
-        value: `Questions do not post in the calendar
+        value: `Questions do not post in the calendar or game-scheduling channels. They post in the channel asked.
         A question can be asked in one of 3 ways
         > -ask, -question, -q
 

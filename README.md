@@ -39,7 +39,8 @@ For more help, type
 > -? question
 
 ## T3Sh Poll Commands Help
-Poll for game scheduling with some options or with a phrase for the days
+Poll for game scheduling with some options or with a phrase for the days. 
+This poll will automatically post in the game-scheduling channel
 
 ### Call Poll
 A poll can be called in one of 2 ways
@@ -72,7 +73,6 @@ The options MUST be separated by commas to be separate options
 > poll [Name] a, b, c, d
 
 ### Poll By Phrase
-This poll will automatically post in calendar
 The poll can use many different phrases to guess the options
 To automatically generate a number of consecutive days, up to 9 days
 (parenthese not part of commands)
@@ -132,7 +132,7 @@ Day and time can be written relative from current time
 Ask a question with some options
 
 ### Ask Question
-Questions do not post in the calendar
+Questions do not post in the calendar or polls channels. They post in the channel asked.
 A question can be asked in one of 3 ways
 > -ask, -question, -q
 

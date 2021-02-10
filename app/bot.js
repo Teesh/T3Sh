@@ -132,9 +132,6 @@ if (process.platform === "win32") {
 // Clean up stray messages and close DB before graceful shutdown
 process.on("SIGINT", async function () {
     try {
-        let channel = bot.channels.cache.find(c => c.name.toLowerCase().includes(settings.default_calendar_channel))
-        let messages = await channel.messages.fetch({ limit: 99 })
-        // await channel.bulkDelete(messages)
         await mongo.close()
     } catch (e) {
         console.log(e)

@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## [0.2.4] - 2021-02-09
 ### Added
 - CHANGELOG file
+- Added version number to the bot activity
+- Made polls post in game-scheduling channel
 
 ### Changed
 - Show invoker in activity based on production or development environment
