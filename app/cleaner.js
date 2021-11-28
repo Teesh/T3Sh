@@ -10,7 +10,7 @@ export default async function (bot) {
     let polls = bot.channels.cache.find(c => c.name.toLowerCase().includes(settings.default_poll_channel))
 
     db.collection("events").find().forEach(async (event) => {
-        if (event.expire === "Invalid date" || moment().diff(moment(event.expire, 'dddd MMM Do, h:mm a')) > 0) {
+        if (event.expire === "Invalid date" || moment().diff(moment(event.expire, 'dddd MMM Do, h:mm a')) > 12*60*60*1000) {
             let message
             console.log(moment().format(), `cleaning event: ${event.name}`)
             try {
